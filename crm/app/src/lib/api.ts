@@ -199,21 +199,45 @@ export interface OpenTask {
 export async function listOpenTasks(): Promise<OpenTask[]> {
   const { data, error } = await supabase
     .from("activities")
-    .select("id,type,notes,due_at,deal_id, deals(title, accounts(name))")
+    .select("id,type,notes,due_at,deal_id")
     .eq("done", false)
     .not("due_at", "is", null)
     .order("due_at", { ascending: true });
   if (error) throw error;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ((data ?? []) as any[]).map((a) => ({
-    id: a.id,
-    type: a.type,
-    notes: a.notes,
-    due_at: a.due_at,
-    deal_id: a.deal_id,
-    dealTitle: a.deals?.title ?? "Onbekende deal",
-    accountName: a.deals?.accounts?.name ?? null,
-  }));
+
+  const acts = (data ?? []) as {
+    id: string;
+    type: ActivityType;
+    notes: string | null;
+    due_at: string;
+    deal_id: string | null;
+  }[];
+  const dealIds = [...new Set(acts.map((a) => a.deal_id).filter(Boolean))] as string[];
+  if (dealIds.length === 0) {
+    return acts.map((a) => ({ ...a, deal_id: a.deal_id ?? "", dealTitle: "Onbekende deal", accountName: null }));
+  }
+
+  // Deal-titels + accountnamen los ophalen (robuuster dan PostgREST-embedding).
+  const [{ data: dealsData }, names] = await Promise.all([
+    supabase.from("deals").select("id,title,account_id").in("id", dealIds),
+    accountNameMap(),
+  ]);
+  const dealMap = new Map(
+    ((dealsData ?? []) as { id: string; title: string; account_id: string }[]).map((d) => [d.id, d])
+  );
+
+  return acts.map((a) => {
+    const d = a.deal_id ? dealMap.get(a.deal_id) : undefined;
+    return {
+      id: a.id,
+      type: a.type,
+      notes: a.notes,
+      due_at: a.due_at,
+      deal_id: a.deal_id ?? "",
+      dealTitle: d?.title ?? "Onbekende deal",
+      accountName: d ? names.get(d.account_id) ?? null : null,
+    };
+  });
 }
 
 // Naam-map van alle accounts die je mag zien (voor accountnaam op deal-kaarten).

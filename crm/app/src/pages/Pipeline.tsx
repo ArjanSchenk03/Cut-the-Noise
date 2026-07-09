@@ -62,24 +62,35 @@ export default function Pipeline() {
     setSelected((cur) => (cur && cur.id === updated.id ? updated : cur));
   };
 
-  const onDrop = async (stage: DealStage) => {
+  // Verplaats een deal naar een specifieke fase (optimistisch, met terugdraaien).
+  const move = async (id: string, from: DealStage, to: DealStage) => {
+    if (from === to) return;
+    setError(null);
+    setDeals((ds) => ds.map((d) => (d.id === id ? { ...d, stage: to } : d)));
+    try {
+      const updated = await moveDealStage(id, to);
+      applyDeal(updated);
+    } catch (e) {
+      setError((e as Error).message);
+      setDeals((ds) => ds.map((d) => (d.id === id ? { ...d, stage: from } : d)));
+    }
+  };
+
+  const onDrop = (stage: DealStage) => {
     setDragOver(null);
     const id = dragId;
     setDragId(null);
     if (!id) return;
     const current = deals.find((d) => d.id === id);
-    if (!current || current.stage === stage) return;
+    if (current) move(id, current.stage, stage);
+  };
 
-    // Optimistisch verplaatsen; bij fout terugdraaien.
-    const prev = current.stage;
-    setDeals((ds) => ds.map((d) => (d.id === id ? { ...d, stage } : d)));
-    try {
-      const updated = await moveDealStage(id, stage);
-      applyDeal(updated);
-    } catch (e) {
-      setError((e as Error).message);
-      setDeals((ds) => ds.map((d) => (d.id === id ? { ...d, stage: prev } : d)));
-    }
+  // Eén fase vooruit/terug via de pijltjes op de kaart.
+  const step = (d: Deal, delta: number) => {
+    const i = PIPELINE_STAGES.indexOf(d.stage);
+    const ni = i + delta;
+    if (i < 0 || ni < 0 || ni >= PIPELINE_STAGES.length) return;
+    move(d.id, d.stage, PIPELINE_STAGES[ni]);
   };
 
   if (loading) return <p className="text-slate-500">Pipeline laden…</p>;
@@ -149,6 +160,31 @@ export default function Pipeline() {
                       >
                         {d.grip_score ?? 0}%
                       </span>
+                    </div>
+                    {/* Zelf verschuiven zonder slepen */}
+                    <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          step(d, -1);
+                        }}
+                        disabled={PIPELINE_STAGES.indexOf(d.stage) === 0}
+                        className="rounded px-2 py-0.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30"
+                        title="Vorige fase"
+                      >
+                        ← terug
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          step(d, 1);
+                        }}
+                        disabled={PIPELINE_STAGES.indexOf(d.stage) === PIPELINE_STAGES.length - 1}
+                        className="rounded px-2 py-0.5 text-xs font-semibold text-ctn-gold hover:bg-ctn-sand disabled:opacity-30"
+                        title="Volgende fase"
+                      >
+                        verder →
+                      </button>
                     </div>
                   </div>
                 ))}
