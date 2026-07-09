@@ -13,6 +13,14 @@ export type ContactRole = "beslisser" | "beinvloeder" | "gebruiker" | "gatekeepe
 export type ActivityType = "belletje" | "afspraak" | "offerte" | "followup" | "notitie";
 export type AppRole = "sales" | "manager" | "admin";
 
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  role: AppRole;
+  team_id: string | null;
+  created_at: string;
+}
+
 export interface Account {
   id: string;
   name: string;

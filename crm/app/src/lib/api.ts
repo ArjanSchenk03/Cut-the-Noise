@@ -12,7 +12,18 @@ import {
   type ContactRole,
   type Deal,
   type DealStage,
+  type Profile,
 } from "./types";
+
+// ---------- Profiel / rol ----------
+export async function getMyProfile(): Promise<Profile | null> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes.user?.id;
+  if (!uid) return null;
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", uid).single();
+  if (error) throw error;
+  return data as Profile;
+}
 
 // ---------- Accounts ----------
 export async function listAccounts(): Promise<Account[]> {
@@ -210,4 +221,70 @@ export async function getFunnelStats(): Promise<FunnelStats> {
     y: ratio(offertes, afspraken),
     z: ratio(orders, offertes),
   };
+}
+
+// Zelfde funnelberekening, maar gegroepeerd per verkoper (owner). Alleen zinvol
+// voor manager/admin — die zien via RLS alle deals. Sales krijgt enkel de eigen rij.
+export interface OwnerFunnel {
+  ownerId: string;
+  name: string;
+  stats: FunnelStats;
+}
+
+export async function getTeamFunnelStats(): Promise<OwnerFunnel[]> {
+  const [dealsRes, histRes, profRes] = await Promise.all([
+    supabase.from("deals").select("id,stage,owner_id"),
+    supabase.from("stage_history").select("deal_id,to_stage"),
+    supabase.from("profiles").select("id,full_name"),
+  ]);
+  if (dealsRes.error) throw dealsRes.error;
+  if (histRes.error) throw histRes.error;
+  if (profRes.error) throw profRes.error;
+
+  const rank = (s: DealStage) => STAGE_RANK[s] ?? 0;
+  const ownerOf = new Map<string, string>();
+  const maxRank = new Map<string, number>();
+
+  for (const d of (dealsRes.data ?? []) as { id: string; stage: DealStage; owner_id: string }[]) {
+    ownerOf.set(d.id, d.owner_id);
+    maxRank.set(d.id, Math.max(maxRank.get(d.id) ?? 0, d.stage === "verloren" ? 0 : rank(d.stage)));
+  }
+  for (const h of (histRes.data ?? []) as { deal_id: string; to_stage: DealStage }[]) {
+    if (h.to_stage === "verloren") continue;
+    maxRank.set(h.deal_id, Math.max(maxRank.get(h.deal_id) ?? 0, rank(h.to_stage)));
+  }
+
+  type Counts = { leads: number; afspraken: number; offertes: number; orders: number };
+  const agg = new Map<string, Counts>();
+  for (const [dealId, r] of maxRank) {
+    const owner = ownerOf.get(dealId);
+    if (!owner) continue;
+    const c = agg.get(owner) ?? { leads: 0, afspraken: 0, offertes: 0, orders: 0 };
+    c.leads++;
+    if (r >= STAGE_RANK.afspraak) c.afspraken++;
+    if (r >= STAGE_RANK.offerte) c.offertes++;
+    if (r >= STAGE_RANK.order_won) c.orders++;
+    agg.set(owner, c);
+  }
+
+  const names = new Map(
+    ((profRes.data ?? []) as { id: string; full_name: string | null }[]).map((p) => [
+      p.id,
+      p.full_name ?? "Onbekend",
+    ])
+  );
+  const ratio = (a: number, b: number) => (b > 0 ? a / b : null);
+
+  return [...agg.entries()]
+    .map(([ownerId, c]) => ({
+      ownerId,
+      name: names.get(ownerId) ?? "Onbekend",
+      stats: {
+        ...c,
+        x: ratio(c.afspraken, c.leads),
+        y: ratio(c.offertes, c.afspraken),
+        z: ratio(c.orders, c.offertes),
+      } as FunnelStats,
+    }))
+    .sort((a, b) => b.stats.orders - a.stats.orders);
 }

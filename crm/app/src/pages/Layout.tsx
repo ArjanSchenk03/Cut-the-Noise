@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Layout() {
-  const { session, signOut } = useAuth();
+  const { session, isManager, signOut } = useAuth();
 
   return (
     <div className="min-h-screen">
@@ -36,6 +36,16 @@ export default function Layout() {
               >
                 Dashboard
               </NavLink>
+              {isManager && (
+                <NavLink
+                  to="/team"
+                  className={({ isActive }) =>
+                    isActive ? "font-semibold text-indigo-600" : "text-slate-600 hover:text-slate-900"
+                  }
+                >
+                  Team
+                </NavLink>
+              )}
               <NavLink
                 to="/accounts"
                 className={({ isActive }) =>
