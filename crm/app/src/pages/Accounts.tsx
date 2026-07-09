@@ -132,12 +132,17 @@ function NewAccountModal({
           <input className={input} value={source} onChange={(e) => setSource(e.target.value)} />
         </label>
         <label className="block text-sm font-medium">
-          ICP-match (0–100)
+          ICP-match (0–100%)
+          <span className="mt-0.5 block text-xs font-normal text-slate-500">
+            ICP = ideaal klantprofiel. Hoe goed past dit account bij je ideale klant?
+            100% = perfecte match (hoge prioriteit), laag = past eigenlijk niet.
+          </span>
           <input
             className={input}
             type="number"
             min={0}
             max={100}
+            placeholder="bijv. 80"
             value={icp}
             onChange={(e) => setIcp(e.target.value)}
           />
