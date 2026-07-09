@@ -51,8 +51,15 @@ accounts ─< contacts
 ## Roadmap
 
 - [x] **Fase 1** — Datamodel + schema + RLS
-- [ ] **Fase 1b** — App-scaffold (Vite + React + TS + Tailwind) + login
-- [ ] **Fase 2** — Pipeline (kanban), accounts/contacten/deals CRUD, activiteiten loggen
-- [ ] **Fase 3** — XYZ-dashboard + terugreken-calculator
-- [ ] **Fase 4** — GRIP-score live (kleurcodering + actielijst)
-- [ ] **Fase 5** — Coaching- & team-rapportage
+- [x] **Fase 1b** — App-scaffold (Vite + React + TS + Tailwind) + login
+- [x] **Fase 2** — Pipeline (kanban) met drag-and-drop, accounts/contacten/deals CRUD, activiteiten loggen
+- [x] **Fase 3** — XYZ-dashboard + terugreken-calculator
+- [x] **Fase 4** — GRIP-score live (kleurcodering + actielijst) — vereist `supabase/upgrade-fase4.sql`
+- [x] **Fase 5** — Coaching- & team-rapportage (manager-view)
+
+### Rollen inschakelen (voor de Team-view)
+Nieuwe gebruikers krijgen rol `sales`. Maak iemand manager via de SQL Editor:
+```sql
+update profiles set role = 'manager' where id = 'JOUW-PROFIEL-ID';
+-- profiel-id vind je met:  select id, full_name, role from profiles;
+```
