@@ -24,7 +24,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">XYZ-dashboard</h1>
+      <h1 className="text-2xl font-bold">CTN-dashboard</h1>
 
       <FunnelSection stats={stats} />
       <RatioSection stats={stats} />
@@ -53,7 +53,7 @@ function FunnelSection({ stats }: { stats: FunnelStats }) {
             <div className="h-7 flex-1 rounded-lg bg-slate-100">
               <div
                 className={`flex h-7 items-center rounded-lg px-2 text-xs font-semibold text-white ${
-                  ["bg-slate-400", "bg-sky-500", "bg-indigo-500", "bg-green-500"][i]
+                  ["bg-slate-400", "bg-sky-500", "bg-ctn-gold", "bg-green-500"][i]
                 }`}
                 style={{ width: `${Math.max(6, (r.value / max) * 100)}%` }}
               >
@@ -81,7 +81,7 @@ function RatioSection({ stats }: { stats: FunnelStats }) {
         {cards.map((c) => (
           <div key={c.k} className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-baseline justify-between">
-              <span className="text-xs font-bold text-indigo-600">{c.k}</span>
+              <span className="text-xs font-bold text-ctn-gold">{c.k}</span>
               <span className="text-2xl font-bold">{pct(c.val)}</span>
             </div>
             <p className="mt-1 text-sm font-medium">{c.label}</p>
@@ -117,7 +117,7 @@ function Calculator({ stats }: { stats: FunnelStats }) {
   }, [target, x, y, z]);
 
   const field =
-    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none";
+    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-ctn-gold focus:outline-none";
 
   return (
     <section>
@@ -166,7 +166,7 @@ function Calculator({ stats }: { stats: FunnelStats }) {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg bg-slate-50 p-3">
-      <p className="text-2xl font-bold text-indigo-600">{value}</p>
+      <p className="text-2xl font-bold text-ctn-gold">{value}</p>
       <p className="text-xs text-slate-500">{label}</p>
     </div>
   );

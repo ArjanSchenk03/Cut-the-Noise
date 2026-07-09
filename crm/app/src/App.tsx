@@ -7,6 +7,7 @@ import Accounts from "./pages/Accounts";
 import AccountDetail from "./pages/AccountDetail";
 import Dashboard from "./pages/Dashboard";
 import Acties from "./pages/Acties";
+import Deals from "./pages/Deals";
 import Team from "./pages/Team";
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/acties" element={<Acties />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/deals" element={<Deals />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/accounts/:id" element={<AccountDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />

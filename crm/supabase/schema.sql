@@ -121,6 +121,8 @@ create table if not exists activities (
   contact_id  uuid references contacts (id) on delete set null,
   type        activity_type not null,
   occurred_at timestamptz not null default now(),
+  due_at      timestamptz,                       -- optionele deadline (maakt het een taak)
+  done        boolean not null default false,    -- taak afgerond?
   notes       text,
   created_by  uuid not null references profiles (id) default auth.uid(),
   created_at  timestamptz not null default now()

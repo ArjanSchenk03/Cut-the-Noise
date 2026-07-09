@@ -16,37 +16,42 @@ export default function Login() {
     setBusy(false);
   };
 
+  const input =
+    "mt-1 w-full rounded-lg border border-ctn-line bg-white px-3 py-2 text-sm focus:border-ctn-gold focus:outline-none";
+
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 px-4">
+    <div className="grid min-h-screen place-items-center bg-ctn-black px-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm space-y-4 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm space-y-5 rounded-2xl bg-ctn-offwhite p-8 shadow-xl"
       >
         <div>
-          <h1 className="text-xl font-bold">XYZ-CRM</h1>
-          <p className="text-sm text-slate-500">Log in om je pipeline te openen.</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-ctn-black">
+            CTN<span className="text-ctn-gold">.</span>CRM
+          </h1>
+          <p className="mt-1 text-sm text-ctn-gray">Van lead naar order — zonder ruis.</p>
         </div>
 
-        <label className="block text-sm font-medium">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-ctn-gray">
           E-mail
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            className={input}
             placeholder="jij@bedrijf.nl"
           />
         </label>
 
-        <label className="block text-sm font-medium">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-ctn-gray">
           Wachtwoord
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
+            className={input}
             placeholder="••••••••"
           />
         </label>
@@ -58,7 +63,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+          className="w-full rounded-lg bg-ctn-gold px-3 py-2.5 text-sm font-bold uppercase tracking-wider text-ctn-black hover:bg-ctn-goldlight disabled:opacity-60"
         >
           {busy ? "Bezig…" : "Inloggen"}
         </button>

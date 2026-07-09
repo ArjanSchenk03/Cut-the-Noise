@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { listDeals } from "../lib/api";
-import { STAGE_LABELS, type Deal } from "../lib/types";
+import { accountNameMap, listDeals, listOpenTasks, setActivityDone, type OpenTask } from "../lib/api";
+import { ACTIVITY_LABELS, STAGE_LABELS, type Deal } from "../lib/types";
 import DealDrawer from "../components/DealDrawer";
 
 const eur = new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" });
@@ -46,18 +46,54 @@ function reasonsFor(d: Deal, now: number): Reason[] {
   return rs;
 }
 
+const DAY = 86_400_000;
+function dueLabel(due: string): { text: string; className: string } {
+  const days = Math.ceil((Date.parse(due) - Date.now()) / DAY);
+  if (days < 0) return { text: `${-days} dgn te laat`, className: "text-red-700" };
+  if (days === 0) return { text: "vandaag", className: "text-red-600" };
+  if (days <= 3) return { text: `over ${days} dgn`, className: "text-amber-700" };
+  return { text: new Date(due).toLocaleDateString("nl-NL"), className: "text-slate-500" };
+}
+
 export default function Acties() {
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [tasks, setTasks] = useState<OpenTask[]>([]);
+  const [accountNames, setAccountNames] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Deal | null>(null);
 
   useEffect(() => {
-    listDeals()
-      .then(setDeals)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+    (async () => {
+      try {
+        setAccountNames(await accountNameMap());
+      } catch {
+        /* optioneel */
+      }
+      try {
+        // Taken vereisen upgrade-fase6.sql; faal zacht als de kolommen ontbreken.
+        setTasks(await listOpenTasks());
+      } catch {
+        /* geen taken-ondersteuning */
+      }
+      try {
+        setDeals(await listDeals());
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
+
+  const completeTask = async (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    try {
+      await setActivityDone(id, true);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
   const items = useMemo(() => {
     const now = Date.now();
@@ -96,6 +132,41 @@ export default function Acties() {
         doorpakken. Klik een deal om direct een activiteit te loggen.
       </p>
 
+      {/* Taken met deadline */}
+      {tasks.length > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-2 text-lg font-semibold">Taken met deadline</h2>
+          <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+            {tasks.map((t) => {
+              const due = dueLabel(t.due_at);
+              return (
+                <li key={t.id} className="flex items-center justify-between gap-2 px-4 py-3">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      onChange={() => completeTask(t.id)}
+                      className="h-4 w-4"
+                    />
+                    <span>
+                      <span className="text-sm font-medium">
+                        {ACTIVITY_LABELS[t.type]}
+                        {t.notes ? `: ${t.notes}` : ""}
+                      </span>
+                      <span className="block text-xs text-slate-500">
+                        {t.accountName ? `${t.accountName} · ` : ""}
+                        {t.dealTitle}
+                      </span>
+                    </span>
+                  </label>
+                  <span className={`text-xs font-semibold ${due.className}`}>{due.text}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <h2 className="mb-2 text-lg font-semibold">Deals die aandacht vragen</h2>
       {items.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
           Geen openstaande acties — alles is opgevolgd. 🎉
@@ -111,6 +182,7 @@ export default function Acties() {
               <div>
                 <p className="text-sm font-medium">{deal.title}</p>
                 <p className="text-xs text-slate-500">
+                  {accountNames.get(deal.account_id) ? `${accountNames.get(deal.account_id)} · ` : ""}
                   {STAGE_LABELS[deal.stage]} · {eur.format(deal.amount ?? 0)} · GRIP{" "}
                   {deal.grip_score ?? 0}%
                 </p>
@@ -131,7 +203,12 @@ export default function Acties() {
       )}
 
       {selected && (
-        <DealDrawer deal={selected} onClose={() => setSelected(null)} onChange={applyDeal} />
+        <DealDrawer
+          deal={selected}
+          accountName={accountNames.get(selected.account_id) ?? null}
+          onClose={() => setSelected(null)}
+          onChange={applyDeal}
+        />
       )}
     </div>
   );

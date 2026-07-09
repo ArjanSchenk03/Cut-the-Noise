@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type DragEvent } from "react";
 import { Link } from "react-router-dom";
-import { listDeals, moveDealStage, recalcAllGrip } from "../lib/api";
+import { accountNameMap, listDeals, moveDealStage, recalcAllGrip } from "../lib/api";
 import { PIPELINE_STAGES, STAGE_LABELS, type Deal, type DealStage } from "../lib/types";
 import DealDrawer from "../components/DealDrawer";
 
@@ -20,11 +20,17 @@ export default function Pipeline() {
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<DealStage | null>(null);
   const [selected, setSelected] = useState<Deal | null>(null);
+  const [accountNames, setAccountNames] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     // Verse GRIP-scores bij het laden; valt terug op een gewone lijst als
     // recalc_all_grip() nog niet in de database staat (upgrade-fase4.sql).
     (async () => {
+      try {
+        setAccountNames(await accountNameMap());
+      } catch {
+        /* accountnamen zijn optioneel voor weergave */
+      }
       try {
         setDeals(await recalcAllGrip());
       } catch {
@@ -90,7 +96,7 @@ export default function Pipeline() {
       {deals.length === 0 && (
         <div className="mb-4 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
           Nog geen deals om te slepen. Maak er eerst een aan via{" "}
-          <Link to="/accounts" className="font-medium text-indigo-600 hover:underline">
+          <Link to="/accounts" className="font-medium text-ctn-gold hover:underline">
             Accounts
           </Link>
           {" "}→ open een account → <strong>+ Nieuwe deal</strong>. De deal verschijnt dan
@@ -112,7 +118,7 @@ export default function Pipeline() {
               onDragLeave={() => setDragOver((s) => (s === stage ? null : s))}
               onDrop={() => onDrop(stage)}
               className={`rounded-xl p-3 transition-colors ${
-                dragOver === stage ? "bg-indigo-100 ring-2 ring-indigo-400" : "bg-slate-100"
+                dragOver === stage ? "bg-ctn-sand ring-2 ring-ctn-gold" : "bg-slate-100"
               }`}
             >
               <div className="mb-1 flex items-center justify-between">
@@ -129,9 +135,12 @@ export default function Pipeline() {
                     onDragStart={() => setDragId(d.id)}
                     onDragEnd={() => setDragId(null)}
                     onClick={() => setSelected(d)}
-                    className="cursor-pointer rounded-lg border border-slate-200 bg-white p-3 shadow-sm hover:border-indigo-300"
+                    className="cursor-pointer rounded-lg border border-slate-200 bg-white p-3 shadow-sm hover:border-ctn-gold"
                   >
                     <p className="text-sm font-medium">{d.title}</p>
+                    {accountNames.get(d.account_id) && (
+                      <p className="text-xs text-ctn-gray">{accountNames.get(d.account_id)}</p>
+                    )}
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-xs text-slate-500">{eur.format(d.amount ?? 0)}</span>
                       <span
@@ -144,7 +153,7 @@ export default function Pipeline() {
                   </div>
                 ))}
                 {items.length === 0 && dragId && (
-                  <p className="rounded-lg border border-dashed border-indigo-300 py-4 text-center text-xs text-indigo-500">
+                  <p className="rounded-lg border border-dashed border-ctn-gold py-4 text-center text-xs text-ctn-gold">
                     Sleep hierheen
                   </p>
                 )}
@@ -155,7 +164,12 @@ export default function Pipeline() {
       </div>
 
       {selected && (
-        <DealDrawer deal={selected} onClose={() => setSelected(null)} onChange={applyDeal} />
+        <DealDrawer
+          deal={selected}
+          accountName={accountNames.get(selected.account_id) ?? null}
+          onClose={() => setSelected(null)}
+          onChange={applyDeal}
+        />
       )}
     </div>
   );

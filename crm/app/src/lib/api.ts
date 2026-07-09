@@ -162,13 +162,68 @@ export async function createActivity(input: {
   account_id?: string | null;
   type: ActivityType;
   notes?: string | null;
+  due_at?: string | null; // deadline; maakt het een taak op de Acties-pagina
 }): Promise<Activity> {
-  const { data, error } = await supabase.from("activities").insert(input).select().single();
+  // due_at alleen meesturen als er een deadline is — zo werkt activiteiten loggen
+  // ook als upgrade-fase6.sql (kolom due_at) nog niet is gedraaid.
+  const payload: Record<string, unknown> = {
+    deal_id: input.deal_id,
+    account_id: input.account_id ?? null,
+    type: input.type,
+    notes: input.notes ?? null,
+  };
+  if (input.due_at) payload.due_at = input.due_at;
+
+  const { data, error } = await supabase.from("activities").insert(payload).select().single();
   if (error) throw error;
   return data as Activity;
 }
 
-// ---------- XYZ-funnelstatistiek (client-side, RLS-veilig) ----------
+export async function setActivityDone(id: string, done: boolean): Promise<void> {
+  const { error } = await supabase.from("activities").update({ done }).eq("id", id);
+  if (error) throw error;
+}
+
+// Open taken (activiteiten met deadline die nog niet afgerond zijn), inclusief
+// deal-titel en accountnaam voor weergave op de Acties-pagina.
+export interface OpenTask {
+  id: string;
+  type: ActivityType;
+  notes: string | null;
+  due_at: string;
+  deal_id: string;
+  dealTitle: string;
+  accountName: string | null;
+}
+
+export async function listOpenTasks(): Promise<OpenTask[]> {
+  const { data, error } = await supabase
+    .from("activities")
+    .select("id,type,notes,due_at,deal_id, deals(title, accounts(name))")
+    .eq("done", false)
+    .not("due_at", "is", null)
+    .order("due_at", { ascending: true });
+  if (error) throw error;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ((data ?? []) as any[]).map((a) => ({
+    id: a.id,
+    type: a.type,
+    notes: a.notes,
+    due_at: a.due_at,
+    deal_id: a.deal_id,
+    dealTitle: a.deals?.title ?? "Onbekende deal",
+    accountName: a.deals?.accounts?.name ?? null,
+  }));
+}
+
+// Naam-map van alle accounts die je mag zien (voor accountnaam op deal-kaarten).
+export async function accountNameMap(): Promise<Map<string, string>> {
+  const { data, error } = await supabase.from("accounts").select("id,name");
+  if (error) throw error;
+  return new Map(((data ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
+}
+
+// ---------- CTN-funnelstatistiek (client-side, RLS-veilig) ----------
 export interface FunnelStats {
   leads: number;
   afspraken: number;

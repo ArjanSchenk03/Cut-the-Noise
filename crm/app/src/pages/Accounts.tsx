@@ -5,7 +5,7 @@ import type { Account } from "../lib/types";
 import Modal from "../components/Modal";
 
 const input =
-  "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none";
+  "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-ctn-gold focus:outline-none";
 
 export default function Accounts() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -28,7 +28,7 @@ export default function Accounts() {
         <h1 className="text-2xl font-bold">Accounts</h1>
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="rounded-lg bg-ctn-gold px-3 py-2 text-sm font-semibold text-ctn-black hover:bg-ctn-goldlight"
         >
           + Nieuw account
         </button>
@@ -55,7 +55,7 @@ export default function Accounts() {
               {accounts.map((a) => (
                 <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50">
                   <td className="px-4 py-2 font-medium">
-                    <Link to={`/accounts/${a.id}`} className="text-indigo-600 hover:underline">
+                    <Link to={`/accounts/${a.id}`} className="text-ctn-gold hover:underline">
                       {a.name}
                     </Link>
                   </td>
@@ -156,7 +156,7 @@ function NewAccountModal({
           <button
             type="submit"
             disabled={busy}
-            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+            className="rounded-lg bg-ctn-gold px-3 py-2 text-sm font-semibold text-ctn-black hover:bg-ctn-goldlight disabled:opacity-60"
           >
             {busy ? "Bezig…" : "Aanmaken"}
           </button>

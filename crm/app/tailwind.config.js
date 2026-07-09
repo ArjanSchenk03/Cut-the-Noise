@@ -3,8 +3,21 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Montserrat", "Arial", "sans-serif"],
+      },
       colors: {
-        // Funnel-fase kleuren (aanpasbaar aan jullie huisstijl)
+        // Cut the Noise huisstijl
+        ctn: {
+          black: "#0A0A0A",
+          offwhite: "#F7F4EE",
+          gold: "#A8762A",
+          goldlight: "#C99A4A",
+          gray: "#6B6B66",
+          sand: "#EFE9DD", // lichte accent-achtergrond
+          line: "#E2DBCD", // warme randkleur
+        },
+        // Funnel-fase kleuren
         stage: {
           lead: "#94a3b8",
           afspraak: "#38bdf8",

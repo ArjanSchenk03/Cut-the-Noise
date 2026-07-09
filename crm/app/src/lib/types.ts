@@ -65,6 +65,8 @@ export interface Activity {
   contact_id: string | null;
   type: ActivityType;
   occurred_at: string;
+  due_at: string | null;
+  done: boolean;
   notes: string | null;
   created_by: string;
   created_at: string;
