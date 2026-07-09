@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type DragEvent } from "react";
+import { Link } from "react-router-dom";
 import { listDeals, moveDealStage, recalcAllGrip } from "../lib/api";
 import { PIPELINE_STAGES, STAGE_LABELS, type Deal, type DealStage } from "../lib/types";
 import DealDrawer from "../components/DealDrawer";
@@ -86,6 +87,17 @@ export default function Pipeline() {
 
       {error && <p className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-red-700">{error}</p>}
 
+      {deals.length === 0 && (
+        <div className="mb-4 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
+          Nog geen deals om te slepen. Maak er eerst een aan via{" "}
+          <Link to="/accounts" className="font-medium text-indigo-600 hover:underline">
+            Accounts
+          </Link>
+          {" "}→ open een account → <strong>+ Nieuwe deal</strong>. De deal verschijnt dan
+          als kaartje in de kolom <strong>Lead</strong>, die je hierheen kunt slepen.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {PIPELINE_STAGES.map((stage) => {
           const items = byStage.get(stage) ?? [];
@@ -131,8 +143,8 @@ export default function Pipeline() {
                     </div>
                   </div>
                 ))}
-                {items.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-slate-300 py-4 text-center text-xs text-slate-400">
+                {items.length === 0 && dragId && (
+                  <p className="rounded-lg border border-dashed border-indigo-300 py-4 text-center text-xs text-indigo-500">
                     Sleep hierheen
                   </p>
                 )}
