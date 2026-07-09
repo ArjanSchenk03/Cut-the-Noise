@@ -6,6 +6,7 @@ import Pipeline from "./pages/Pipeline";
 import Accounts from "./pages/Accounts";
 import AccountDetail from "./pages/AccountDetail";
 import Dashboard from "./pages/Dashboard";
+import Acties from "./pages/Acties";
 
 export default function App() {
   const { session, loading } = useAuth();
@@ -31,6 +32,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Pipeline />} />
+        <Route path="/acties" element={<Acties />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/accounts/:id" element={<AccountDetail />} />

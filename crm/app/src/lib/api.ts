@@ -104,9 +104,26 @@ export async function updateDeal(
   return data as Deal;
 }
 
-// Verplaats een deal naar een andere fase (trigger logt de overgang in stage_history).
+// Verplaats een deal naar een andere fase (trigger logt de overgang in
+// stage_history). Fase-gewicht is onderdeel van GRIP, dus meteen herberekenen
+// (best effort: bij een fout blijft de oude score staan).
 export async function moveDealStage(id: string, stage: DealStage): Promise<Deal> {
-  return updateDeal(id, { stage });
+  const updated = await updateDeal(id, { stage });
+  try {
+    const score = await recalcGrip(id);
+    return { ...updated, grip_score: score };
+  } catch {
+    return updated;
+  }
+}
+
+// Herbereken GRIP voor alle lopende deals server-side en geef de actuele,
+// niet-verloren deals terug. Vereist recalc_all_grip() in de database
+// (upgrade-fase4.sql); de aanroeper valt terug op listDeals() als die ontbreekt.
+export async function recalcAllGrip(): Promise<Deal[]> {
+  const { data, error } = await supabase.rpc("recalc_all_grip");
+  if (error) throw error;
+  return (data ?? []) as Deal[];
 }
 
 // Herbereken de GRIP-score in de database en sla hem op de deal op.

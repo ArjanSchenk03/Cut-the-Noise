@@ -229,6 +229,22 @@ begin
   return least(95, greatest(0, round(score)))::int;
 end $$;
 
+-- Herbereken GRIP voor alle lopende deals en geef de actuele, niet-verloren
+-- deals terug. De app roept dit aan bij het laden van de pipeline. RLS bepaalt
+-- welke deals je ziet/bijwerkt (security invoker).
+create or replace function recalc_all_grip()
+returns setof deals
+language plpgsql as $$
+begin
+  update deals
+     set grip_score = calc_grip(id)
+   where stage not in ('order_won', 'verloren')
+     and grip_score is distinct from calc_grip(id);  -- alleen echte wijzigingen
+
+  return query
+  select * from deals where stage <> 'verloren' order by updated_at desc;
+end $$;
+
 -- =============================================================================
 -- VIEW: XYZ-ratio's per verkoper (afspraak / offerte / order)
 --   X = afspraken ÷ leads   |   Y = offertes ÷ afspraken   |   Z = orders ÷ offertes

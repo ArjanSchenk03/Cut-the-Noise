@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type DragEvent } from "react";
-import { listDeals, moveDealStage } from "../lib/api";
+import { listDeals, moveDealStage, recalcAllGrip } from "../lib/api";
 import { PIPELINE_STAGES, STAGE_LABELS, type Deal, type DealStage } from "../lib/types";
 import DealDrawer from "../components/DealDrawer";
 
@@ -21,10 +21,21 @@ export default function Pipeline() {
   const [selected, setSelected] = useState<Deal | null>(null);
 
   useEffect(() => {
-    listDeals()
-      .then(setDeals)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+    // Verse GRIP-scores bij het laden; valt terug op een gewone lijst als
+    // recalc_all_grip() nog niet in de database staat (upgrade-fase4.sql).
+    (async () => {
+      try {
+        setDeals(await recalcAllGrip());
+      } catch {
+        try {
+          setDeals(await listDeals());
+        } catch (e) {
+          setError((e as Error).message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const byStage = useMemo(() => {
