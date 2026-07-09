@@ -319,10 +319,17 @@ create policy p_activities_all on activities for all
   using (created_by = auth.uid() or current_app_role() in ('manager','admin'))
   with check (created_by = auth.uid() or current_app_role() in ('manager','admin'));
 
--- stage_history: alleen lezen (schrijven gebeurt via trigger)
+-- stage_history: lezen én (via de trigger) schrijven voor de deal-eigenaar/manager.
+-- Zonder de insert-policy blokkeert RLS de trigger-insert en draait de hele
+-- fase-wijziging terug ("new row violates row-level security policy").
 drop policy if exists p_stage_history_read on stage_history;
 create policy p_stage_history_read on stage_history for select
   using (exists (select 1 from deals d where d.id = stage_history.deal_id
+                 and (d.owner_id = auth.uid() or current_app_role() in ('manager','admin'))));
+
+drop policy if exists p_stage_history_insert on stage_history;
+create policy p_stage_history_insert on stage_history for insert
+  with check (exists (select 1 from deals d where d.id = stage_history.deal_id
                  and (d.owner_id = auth.uid() or current_app_role() in ('manager','admin'))));
 
 -- =============================================================================
