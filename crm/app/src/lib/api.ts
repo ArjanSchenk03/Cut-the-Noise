@@ -3,14 +3,15 @@
 // dus die hoeven we bij insert niet mee te sturen.
 
 import { supabase } from "./supabase";
-import type {
-  Account,
-  Activity,
-  ActivityType,
-  Contact,
-  ContactRole,
-  Deal,
-  DealStage,
+import {
+  STAGE_RANK,
+  type Account,
+  type Activity,
+  type ActivityType,
+  type Contact,
+  type ContactRole,
+  type Deal,
+  type DealStage,
 } from "./types";
 
 // ---------- Accounts ----------
@@ -137,4 +138,59 @@ export async function createActivity(input: {
   const { data, error } = await supabase.from("activities").insert(input).select().single();
   if (error) throw error;
   return data as Activity;
+}
+
+// ---------- XYZ-funnelstatistiek (client-side, RLS-veilig) ----------
+export interface FunnelStats {
+  leads: number;
+  afspraken: number;
+  offertes: number;
+  orders: number;
+  // Conversieratio's (0..1) of null bij onvoldoende data.
+  x: number | null; // afspraken ÷ leads
+  y: number | null; // offertes ÷ afspraken
+  z: number | null; // orders ÷ offertes
+}
+
+// Berekent hoeveel deals elke funnelfase (ooit) bereikten, o.b.v. huidige fase
+// én stage_history — zo tellen ook verloren deals mee tot waar ze kwamen.
+export async function getFunnelStats(): Promise<FunnelStats> {
+  const [dealsRes, histRes] = await Promise.all([
+    supabase.from("deals").select("id,stage"),
+    supabase.from("stage_history").select("deal_id,to_stage"),
+  ]);
+  if (dealsRes.error) throw dealsRes.error;
+  if (histRes.error) throw histRes.error;
+
+  const rank = (s: DealStage) => STAGE_RANK[s] ?? 0;
+  const maxRank = new Map<string, number>();
+
+  for (const d of (dealsRes.data ?? []) as { id: string; stage: DealStage }[]) {
+    maxRank.set(d.id, Math.max(maxRank.get(d.id) ?? 0, d.stage === "verloren" ? 0 : rank(d.stage)));
+  }
+  for (const h of (histRes.data ?? []) as { deal_id: string; to_stage: DealStage }[]) {
+    if (h.to_stage === "verloren") continue;
+    maxRank.set(h.deal_id, Math.max(maxRank.get(h.deal_id) ?? 0, rank(h.to_stage)));
+  }
+
+  let afspraken = 0;
+  let offertes = 0;
+  let orders = 0;
+  for (const r of maxRank.values()) {
+    if (r >= STAGE_RANK.afspraak) afspraken++;
+    if (r >= STAGE_RANK.offerte) offertes++;
+    if (r >= STAGE_RANK.order_won) orders++;
+  }
+  const leads = maxRank.size;
+  const ratio = (a: number, b: number) => (b > 0 ? a / b : null);
+
+  return {
+    leads,
+    afspraken,
+    offertes,
+    orders,
+    x: ratio(afspraken, leads),
+    y: ratio(offertes, afspraken),
+    z: ratio(orders, offertes),
+  };
 }

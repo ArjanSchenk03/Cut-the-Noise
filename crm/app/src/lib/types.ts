@@ -80,6 +80,16 @@ export const PIPELINE_STAGES: DealStage[] = [
   "order_won",
 ];
 
+// Rangorde van de funnel-fases (voor "heeft minstens fase X bereikt"-tellingen).
+export const STAGE_RANK: Record<DealStage, number> = {
+  lead: 0,
+  afspraak: 1,
+  offerte: 2,
+  onderhandeling: 3,
+  order_won: 4,
+  verloren: 0, // een verloren deal telt nog steeds als lead
+};
+
 export const ACTIVITY_LABELS: Record<ActivityType, string> = {
   belletje: "Belletje",
   afspraak: "Afspraak",
