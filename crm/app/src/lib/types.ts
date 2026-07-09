@@ -50,14 +50,16 @@ export interface Contact {
   created_at: string;
 }
 
-// Minimale Database-typing zodat createClient<Database> tevreden is.
-// Uitbreiden zodra de types worden gegenereerd.
-export interface Database {
-  public: {
-    Tables: Record<string, { Row: Record<string, unknown> }>;
-    Views: Record<string, { Row: Record<string, unknown> }>;
-    Functions: Record<string, unknown>;
-  };
+export interface Activity {
+  id: string;
+  deal_id: string | null;
+  account_id: string | null;
+  contact_id: string | null;
+  type: ActivityType;
+  occurred_at: string;
+  notes: string | null;
+  created_by: string;
+  created_at: string;
 }
 
 export const STAGE_LABELS: Record<DealStage, string> = {
@@ -77,3 +79,18 @@ export const PIPELINE_STAGES: DealStage[] = [
   "onderhandeling",
   "order_won",
 ];
+
+export const ACTIVITY_LABELS: Record<ActivityType, string> = {
+  belletje: "Belletje",
+  afspraak: "Afspraak",
+  offerte: "Offerte",
+  followup: "Follow-up",
+  notitie: "Notitie",
+};
+
+export const CONTACT_ROLE_LABELS: Record<ContactRole, string> = {
+  beslisser: "Beslisser",
+  beinvloeder: "Beïnvloeder",
+  gebruiker: "Gebruiker",
+  gatekeeper: "Gatekeeper",
+};

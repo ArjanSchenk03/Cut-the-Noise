@@ -13,11 +13,20 @@ export default function Layout() {
             <nav className="flex gap-4 text-sm">
               <NavLink
                 to="/"
+                end
                 className={({ isActive }) =>
                   isActive ? "font-semibold text-indigo-600" : "text-slate-600 hover:text-slate-900"
                 }
               >
                 Pipeline
+              </NavLink>
+              <NavLink
+                to="/accounts"
+                className={({ isActive }) =>
+                  isActive ? "font-semibold text-indigo-600" : "text-slate-600 hover:text-slate-900"
+                }
+              >
+                Accounts
               </NavLink>
             </nav>
           </div>

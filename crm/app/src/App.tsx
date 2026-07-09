@@ -3,6 +3,8 @@ import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Layout from "./pages/Layout";
 import Pipeline from "./pages/Pipeline";
+import Accounts from "./pages/Accounts";
+import AccountDetail from "./pages/AccountDetail";
 
 export default function App() {
   const { session, loading } = useAuth();
@@ -28,6 +30,8 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Pipeline />} />
+        <Route path="/accounts" element={<Accounts />} />
+        <Route path="/accounts/:id" element={<AccountDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
