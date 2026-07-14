@@ -183,6 +183,7 @@ export default function Deals() {
           accountName={accountName.get(selected.account_id) ?? null}
           onClose={() => setSelected(null)}
           onChange={applyDeal}
+          onDeleted={(id) => setDeals((ds) => ds.filter((d) => d.id !== id))}
         />
       )}
     </div>

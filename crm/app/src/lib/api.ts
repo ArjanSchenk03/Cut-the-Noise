@@ -115,6 +115,12 @@ export async function updateDeal(
   return data as Deal;
 }
 
+// Verwijder een deal definitief (cascade wist ook activiteiten en fase-historie).
+export async function deleteDeal(id: string): Promise<void> {
+  const { error } = await supabase.from("deals").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // Verplaats een deal naar een andere fase (trigger logt de overgang in
 // stage_history). Fase-gewicht is onderdeel van GRIP, dus meteen herberekenen
 // (best effort: bij een fout blijft de oude score staan).

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
   createActivity,
+  deleteDeal,
   listActivities,
   moveDealStage,
   recalcGrip,
@@ -33,11 +34,13 @@ export default function DealDrawer({
   accountName,
   onClose,
   onChange,
+  onDeleted,
 }: {
   deal: Deal;
   accountName?: string | null;
   onClose: () => void;
   onChange: (d: Deal) => void; // laat de aanroepende pagina zijn state bijwerken
+  onDeleted?: (id: string) => void; // verwijdert de deal uit de aanroepende lijst
 }) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,46 @@ export default function DealDrawer({
   const [busy, setBusy] = useState(false);
   const [lostOpen, setLostOpen] = useState(false);
   const [lostReason, setLostReason] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // Bewerken van de dealgegevens
+  const [editing, setEditing] = useState(false);
+  const [eTitle, setETitle] = useState(deal.title);
+  const [eAmount, setEAmount] = useState(deal.amount != null ? String(deal.amount) : "");
+  const [eClose, setEClose] = useState(deal.expected_close_date ?? "");
+
+  const startEdit = () => {
+    setETitle(deal.title);
+    setEAmount(deal.amount != null ? String(deal.amount) : "");
+    setEClose(deal.expected_close_date ?? "");
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    setError(null);
+    try {
+      const updated = await updateDeal(deal.id, {
+        title: eTitle.trim(),
+        amount: eAmount ? Number(eAmount) : null,
+        expected_close_date: eClose || null,
+      });
+      onChange(updated);
+      setEditing(false);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setError(null);
+    try {
+      await deleteDeal(deal.id);
+      onDeleted?.(deal.id);
+      onClose();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
 
   useEffect(() => {
     listActivities(deal.id)
@@ -137,17 +180,58 @@ export default function DealDrawer({
               {eur.format(deal.amount ?? 0)}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100"
-            aria-label="Sluiten"
-          >
-            ✕
-          </button>
+          <div className="flex shrink-0 gap-1">
+            <button
+              onClick={startEdit}
+              className="rounded-lg px-2 py-1 text-xs font-semibold text-ctn-gold hover:bg-ctn-sand"
+              title="Deal bewerken"
+            >
+              ✎ Bewerken
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100"
+              aria-label="Sluiten"
+            >
+              ✕
+            </button>
+          </div>
         </header>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
           {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+
+          {editing && (
+            <div className="space-y-2 rounded-xl border border-ctn-gold/50 bg-ctn-sand p-3">
+              <p className="text-sm font-semibold">Deal bewerken</p>
+              <label className="block text-xs font-medium text-slate-600">
+                Titel
+                <input className={input} value={eTitle} onChange={(e) => setETitle(e.target.value)} />
+              </label>
+              <label className="block text-xs font-medium text-slate-600">
+                Bedrag (€)
+                <input className={input} type="number" min={0} value={eAmount} onChange={(e) => setEAmount(e.target.value)} />
+              </label>
+              <label className="block text-xs font-medium text-slate-600">
+                Verwachte sluitdatum
+                <input className={input} type="date" value={eClose} onChange={(e) => setEClose(e.target.value)} />
+              </label>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium hover:bg-slate-50"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={saveEdit}
+                  className="flex-1 rounded-lg bg-ctn-gold px-3 py-2 text-sm font-semibold text-ctn-black hover:bg-ctn-goldlight"
+                >
+                  Opslaan
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Fase + volgende-fase-knop */}
           <div>
@@ -278,13 +362,43 @@ export default function DealDrawer({
                 </button>
               </div>
             </div>
+          ) : deleteOpen ? (
+            <div className="space-y-2">
+              <p className="text-sm text-slate-600">
+                Deze deal <strong>definitief verwijderen</strong>? Dit kan niet ongedaan
+                worden gemaakt. Gebruik dit voor foutjes; "verloren" is voor deals die je
+                echt niet wint.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDeleteOpen(false)}
+                  className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                >
+                  Verwijderen
+                </button>
+              </div>
+            </div>
           ) : (
-            <button
-              onClick={() => setLostOpen(true)}
-              className="w-full rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
-            >
-              Markeer als verloren
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLostOpen(true)}
+                className="flex-1 rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+              >
+                Markeer verloren
+              </button>
+              <button
+                onClick={() => setDeleteOpen(true)}
+                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              >
+                Verwijderen
+              </button>
+            </div>
           )}
         </footer>
       </aside>
