@@ -23,6 +23,16 @@ const input =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-ctn-gold focus:outline-none";
 const ACTIVITY_TYPES: ActivityType[] = ["belletje", "afspraak", "offerte", "followup", "notitie"];
 
+// Link naar de offerte-generator (public/offerte.html) met de dealgegevens als
+// query-parameters, plus een terug-link naar de pagina waar we vandaan komen.
+function offerteUrl(deal: Deal, accountName?: string | null): string {
+  const q = new URLSearchParams({ deal: deal.id, from: window.location.href });
+  if (accountName) q.set("dealer", accountName);
+  if (deal.title) q.set("titel", deal.title);
+  if (deal.amount != null) q.set("bedrag", String(deal.amount));
+  return `/offerte.html?${q.toString()}`;
+}
+
 function nextStage(stage: DealStage): DealStage | null {
   const i = PIPELINE_STAGES.indexOf(stage);
   if (i === -1 || i >= PIPELINE_STAGES.length - 1) return null;
@@ -270,6 +280,15 @@ export default function DealDrawer({
               Herbereken
             </button>
           </div>
+
+          {/* Offerte-generator openen met de dealgegevens al ingevuld */}
+          <a
+            href={offerteUrl(deal, accountName)}
+            className="flex items-center justify-center gap-2 rounded-lg border border-ctn-gold px-3 py-2 text-sm font-semibold text-ctn-gold hover:bg-ctn-gold hover:text-ctn-black"
+            title="Opent de offerte-generator met dealer, projectnaam en bedrag al ingevuld"
+          >
+            Offerte maken →
+          </a>
 
           {/* Activiteit / taak toevoegen */}
           <form onSubmit={addActivity} className="space-y-2 rounded-xl border border-slate-200 p-3">

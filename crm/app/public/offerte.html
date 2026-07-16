@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offerte Generator — Cut the Noise.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0A0A0A;
+    --offwhite:#F7F4EE;
+    --gold:#A8762A;
+    --gold-light:#C99A4A;
+    --gold-dim:rgba(168,118,42,0.15);
+    --gray:#6B6B66;
+    --line:rgba(10,10,10,0.1);
+    --line-dark:rgba(247,244,238,0.14);
+    --maxw:1180px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Montserrat',Arial,sans-serif;
+    background:var(--offwhite);
+    color:var(--black);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px;}
+  .kicker{font-weight:700;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+  .kicker.on-dark{color:var(--gold-light);}
+  h1,h2,h3{font-weight:800;letter-spacing:-0.01em;}
+  h1{font-size:clamp(30px,4.4vw,46px);}
+  h2{font-size:clamp(22px,2.6vw,30px);}
+  h3{font-size:17px;}
+  p{color:var(--gray);}
+
+  /* ===== HEADER ===== */
+  header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.94);backdrop-filter:blur(8px);}
+  nav{display:flex;align-items:center;justify-content:space-between;max-width:var(--maxw);margin:0 auto;padding:16px 32px;gap:16px;}
+  .brand{display:flex;align-items:center;gap:10px;color:var(--offwhite);font-weight:800;font-size:16px;}
+  .brand svg{width:26px;height:22px;flex:none;color:var(--offwhite);}
+  .brand small{color:var(--gold-light);font-weight:700;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;}
+  .nav-right{display:flex;align-items:center;gap:16px;}
+  .nav-status{font-size:12px;color:#9a978f;font-weight:600;}
+  .backlink{
+    display:none;align-items:center;gap:7px;color:var(--gold-light);font-size:12px;font-weight:700;
+    text-decoration:none;border:1px solid rgba(201,154,74,0.45);padding:7px 13px;border-radius:2px;
+    transition:all .15s ease;
+  }
+  .backlink:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
+  .backlink.show{display:inline-flex;}
+
+  /* ===== HERO ===== */
+  .hero{background:var(--black);color:var(--offwhite);padding:52px 0 60px;}
+  .hero h1{margin-top:12px;}
+  .hero h1 span{color:var(--gold-light);}
+  .hero p{color:#cfcdc6;margin-top:14px;max-width:640px;font-size:15px;}
+  .dealbar{
+    display:none;margin-top:22px;border:1px solid rgba(201,154,74,0.4);background:rgba(168,118,42,0.12);
+    border-radius:2px;padding:13px 16px;font-size:13px;color:#e8e4dc;font-weight:600;
+    align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .dealbar.show{display:flex;}
+  .dealbar b{color:var(--gold-light);}
+  .dealbar .tag{
+    font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
+    background:var(--gold);color:var(--black);padding:3px 8px;border-radius:2px;
+  }
+
+  /* ===== LAYOUT ===== */
+  main{padding:44px 0 140px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:2px;padding:30px 28px;margin-bottom:22px;transition:opacity .18s ease;}
+  .card.off{opacity:.5;}
+  .card.off .card-head h2{text-decoration:line-through;text-decoration-thickness:2px;}
+  .card-head{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .card-head .num{color:var(--gold);font-weight:800;font-size:13px;letter-spacing:0.1em;flex:none;}
+  .card-head h2{font-size:21px;}
+  .card-head .hint{font-size:12px;color:var(--gray);}
+
+  /* toggle */
+  .sw{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none;margin-left:auto;flex:none;}
+  .sw input{position:absolute;opacity:0;pointer-events:none;}
+  .sw .track{width:38px;height:21px;border-radius:11px;background:#d8d4cc;position:relative;transition:background .18s ease;flex:none;}
+  .sw .knob{position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .18s ease;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .sw input:checked + .track{background:var(--gold);}
+  .sw input:checked + .track .knob{transform:translateX(17px);}
+  .sw .swlbl{font-size:10.5px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);white-space:nowrap;}
+  .sw input:checked ~ .swlbl{color:var(--gold);}
+
+  label{display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);margin-bottom:7px;}
+  .fhint{font-size:12px;color:var(--gray);font-weight:500;text-transform:none;letter-spacing:0;margin-top:4px;}
+  input[type=text],input[type=date],input[type=number],select,textarea{
+    width:100%;font-family:inherit;font-size:14px;color:var(--black);
+    background:var(--offwhite);border:1px solid var(--line);border-radius:2px;
+    padding:11px 13px;transition:border-color .15s ease, background .15s ease;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);background:#fff;}
+  textarea{resize:vertical;min-height:88px;line-height:1.6;}
+  .grid{display:grid;gap:18px;}
+  .g2{grid-template-columns:1fr 1fr;}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+
+  /* ===== ROWS + REORDER ===== */
+  .rows{display:flex;flex-direction:column;gap:9px;}
+  .row{display:flex;gap:9px;align-items:center;}
+  .row input{flex:1;}
+  .row .amt{flex:0 0 130px;}
+  .ctrls{display:flex;gap:4px;flex:none;}
+  .mv,.del{
+    border:1px solid var(--line);background:transparent;color:var(--gray);
+    border-radius:2px;cursor:pointer;padding:0;transition:all .15s ease;font-family:inherit;
+  }
+  .mv{width:25px;height:34px;font-size:8px;line-height:1;}
+  .del{width:32px;height:34px;font-size:17px;line-height:1;}
+  .mv:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+  .del:hover{background:var(--black);color:var(--offwhite);border-color:var(--black);}
+  .mv:disabled{opacity:.25;cursor:default;}
+  .mv:disabled:hover{background:transparent;color:var(--gray);border-color:var(--line);}
+  .add{
+    margin-top:11px;background:transparent;border:1px dashed rgba(168,118,42,0.5);color:var(--gold);
+    font-family:inherit;font-weight:700;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;
+    padding:9px 16px;border-radius:2px;cursor:pointer;transition:all .15s ease;
+  }
+  .add:hover{background:var(--gold-dim);border-style:solid;}
+
+  /* risks */
+  .risk-row{display:grid;grid-template-columns:1fr 1.7fr auto;gap:9px;align-items:start;}
+  .risk-row textarea{min-height:44px;overflow:hidden;padding:10px 13px;line-height:1.5;}
+  .risk-row input{padding:10px 13px;}
+  .risk-head{display:grid;grid-template-columns:1fr 1.7fr auto;gap:9px;margin-bottom:7px;}
+  .risk-head span{font-size:10px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--gray);}
+  .risk-head .sp{width:95px;}
+
+  /* ===== PHASES ===== */
+  .phase{border:1px solid var(--line);border-radius:2px;padding:18px;margin-bottom:12px;background:var(--offwhite);}
+  .phase-top{display:grid;grid-template-columns:1fr 96px 96px auto;gap:9px;align-items:end;margin-bottom:11px;}
+  .phase-top label{margin:0;}
+  .mini{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin-bottom:5px;display:block;}
+
+  /* ===== GANTT ===== */
+  .gantt{background:#fff;border:1px solid var(--line);border-radius:2px;padding:22px;margin-top:20px;}
+  .gantt-months{display:grid;margin-bottom:6px;}
+  .gantt-months div{
+    font-size:10px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);
+    text-align:center;border-left:1px solid var(--line);padding:3px 0;
+  }
+  .gantt-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .gantt-lbl{flex:0 0 150px;font-size:12px;font-weight:700;color:var(--black);}
+  .gantt-lbl small{display:block;font-weight:600;color:var(--gray);font-size:10.5px;}
+  .gantt-track{flex:1;position:relative;height:30px;background:var(--offwhite);border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  .gantt-grid{position:absolute;inset:0;display:grid;}
+  .gantt-grid span{border-left:1px solid rgba(10,10,10,0.055);}
+  .gantt-bar{
+    position:absolute;top:4px;bottom:4px;background:var(--gold);border-radius:2px;
+    display:flex;align-items:center;padding:0 9px;color:#fff;font-size:10.5px;font-weight:800;
+    letter-spacing:0.04em;white-space:nowrap;overflow:hidden;
+  }
+  .gantt-bar.alt{background:var(--black);}
+  .gantt-legend{display:flex;gap:18px;margin-top:14px;font-size:11px;color:var(--gray);font-weight:600;flex-wrap:wrap;}
+  .gantt-legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+
+  /* ===== COST ===== */
+  .cost-cols{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
+  .cost-block h3{margin-bottom:4px;}
+  .cost-block .sub{font-size:12px;color:var(--gray);margin-bottom:14px;}
+  .cost-tot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;border-top:2px solid var(--black);padding-top:11px;font-weight:800;font-size:14px;}
+  .totbar{margin-top:26px;border-top:1px solid var(--line);padding-top:22px;}
+  .split{display:flex;height:34px;border-radius:2px;overflow:hidden;border:1px solid var(--line);}
+  .split div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;letter-spacing:0.06em;color:#fff;transition:width .25s ease;}
+  .split .cap{background:var(--gold);}
+  .split .ope{background:var(--black);}
+  .grand{display:flex;justify-content:space-between;align-items:baseline;margin-top:18px;}
+  .grand .lab{font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gray);}
+  .grand .val{font-size:32px;font-weight:800;}
+  .warn{margin-top:12px;font-size:12px;font-weight:700;color:#9a3412;background:#fef3c7;border:1px solid #fcd34d;padding:9px 12px;border-radius:2px;display:none;}
+  .warn.show{display:block;}
+
+  /* ===== KPI ===== */
+  .kpi-row{display:grid;grid-template-columns:1fr 130px 150px auto;gap:9px;align-items:center;}
+  .kpi-head{display:grid;grid-template-columns:1fr 130px 150px auto;gap:9px;margin-bottom:7px;}
+  .kpi-head span{font-size:10px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--gray);}
+  .kpi-head .sp{width:95px;}
+
+  /* ===== ACTIONBAR ===== */
+  .actionbar{position:fixed;bottom:0;left:0;right:0;z-index:90;background:rgba(10,10,10,0.96);backdrop-filter:blur(8px);border-top:1px solid var(--line-dark);}
+  .actionbar-in{max-width:var(--maxw);margin:0 auto;padding:15px 32px;display:flex;align-items:center;gap:14px;}
+  .actionbar .info{color:#9a978f;font-size:12px;font-weight:600;margin-right:auto;}
+  .actionbar .info b{color:var(--gold-light);}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;padding:13px 26px;font-family:inherit;
+    font-weight:700;font-size:13.5px;letter-spacing:0.03em;text-transform:uppercase;
+    border-radius:2px;border:2px solid transparent;cursor:pointer;
+    transition:transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease;white-space:nowrap;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-gold{background:var(--gold);color:var(--black);}
+  .btn-gold:hover{background:var(--gold-light);}
+  .btn-outline-light{border-color:var(--offwhite);color:var(--offwhite);background:transparent;}
+  .btn-outline-light:hover{background:var(--offwhite);color:var(--black);}
+  .btn-ghost{border-color:rgba(247,244,238,0.3);color:#cfcdc6;background:transparent;}
+  .btn-ghost:hover{border-color:var(--offwhite);color:var(--offwhite);}
+  .toast{
+    position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(14px);
+    background:var(--black);color:var(--offwhite);padding:13px 24px;border-radius:2px;
+    font-size:13px;font-weight:700;border-left:3px solid var(--gold);
+    opacity:0;pointer-events:none;transition:all .25s ease;z-index:120;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:860px){
+    .g2,.g3,.cost-cols{grid-template-columns:1fr;}
+    .phase-top{grid-template-columns:1fr 1fr;}
+    .actionbar-in{flex-wrap:wrap;}
+    .actionbar .info{width:100%;margin-bottom:4px;}
+    .kpi-row,.kpi-head,.risk-row,.risk-head{grid-template-columns:1fr;}
+  }
+
+  /* ================= PRINT / PDF ================= */
+  #print-root{display:none;}
+  @media print{
+    @page{size:A4;margin:14mm 14mm 16mm;}
+    html,body{background:#fff !important;}
+    header,.hero,main,.actionbar,.toast{display:none !important;}
+    #print-root{display:block !important;}
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  }
+  #print-root{font-size:10.5pt;color:var(--black);}
+  .p-cover{background:var(--black);color:var(--offwhite);padding:26mm 18mm;height:257mm;display:flex;flex-direction:column;page-break-after:always;}
+  .p-cover .brand svg{width:44px;height:38px;}
+  .p-cover .brand{font-size:20px;gap:13px;}
+  .p-cover h1{font-size:40pt;line-height:1.05;margin-top:auto;}
+  .p-cover h1 span{color:var(--gold-light);}
+  .p-cover .meta{margin-top:26px;border-top:1px solid var(--line-dark);padding-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px 30px;}
+  .p-cover .meta div span{display:block;font-size:8pt;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold-light);}
+  .p-cover .meta div b{font-size:12pt;font-weight:700;color:var(--offwhite);}
+  .p-cover .tagline{margin-top:20px;font-size:9.5pt;color:#cfcdc6;font-weight:600;}
+
+  /* Eén .pg = één A4. Printbare hoogte = 297 - 14 (boven) - 16 (onder) = 267mm;
+     265mm laat 2mm speling zodat er nooit een lege vervolgpagina ontstaat. */
+  .pg{min-height:265mm;display:flex;flex-direction:column;page-break-after:always;}
+  .pg:last-child{page-break-after:auto;}
+  .pg-body{flex:1 0 auto;}
+  .p-pagefoot{
+    flex:none;margin-top:6mm;border-top:1px solid var(--line);padding-top:1.5mm;
+    display:flex;justify-content:space-between;font-size:7.5pt;color:var(--gray);font-weight:600;
+  }
+  .p-pagefoot b{color:var(--black);}
+  .p-sec{margin-bottom:9mm;}
+  .p-sec h2{font-size:15pt;margin-bottom:3mm;padding-bottom:2mm;border-bottom:2px solid var(--black);page-break-after:avoid;}
+  .p-sec h3{font-size:10.5pt;margin:4mm 0 1.5mm;color:var(--black);page-break-after:avoid;}
+  .p-kick{font-size:8pt;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5mm;}
+  .p-sec p{color:#3d3d3a;font-size:10pt;line-height:1.55;white-space:pre-wrap;}
+  .p-sec ul{margin:2mm 0 0 0;padding:0;list-style:none;}
+  .p-sec ul li{font-size:10pt;color:#3d3d3a;padding:1.1mm 0 1.1mm 6mm;position:relative;line-height:1.45;page-break-inside:avoid;}
+  .p-sec ul li::before{content:"";position:absolute;left:1.5mm;top:2.6mm;width:2mm;height:2mm;background:var(--gold);border-radius:50%;}
+  .p-tbl{width:100%;border-collapse:collapse;margin-top:2.5mm;}
+  .p-tbl thead{display:table-header-group;}
+  .p-tbl tr{page-break-inside:avoid;}
+  .p-tbl th{text-align:left;font-size:7.5pt;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:#fff;background:var(--black);padding:2.4mm 2.6mm;}
+  .p-tbl td{font-size:9.5pt;color:#3d3d3a;padding:2.2mm 2.6mm;border-bottom:1px solid var(--line);vertical-align:top;}
+  .p-tbl tr:nth-child(even) td{background:#faf8f4;}
+  .p-tbl td.r,.p-tbl th.r{text-align:right;}
+  .p-tbl tfoot td{font-weight:800;color:var(--black);border-top:2px solid var(--black);border-bottom:none;background:#fff !important;font-size:10pt;}
+  .p-note{font-size:8.5pt;color:var(--gray);margin-top:2mm;font-style:italic;}
+
+  .p-money{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:3mm;page-break-inside:avoid;}
+  .p-mcard{border:1px solid var(--line);border-radius:2px;padding:4mm;}
+  .p-mcard span{font-size:7.5pt;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);}
+  .p-mcard b{display:block;font-size:19pt;margin-top:1.5mm;}
+  .p-mcard i{display:block;font-size:8.5pt;color:var(--gray);font-style:normal;margin-top:1mm;}
+  .p-split{display:flex;height:9mm;border-radius:2px;overflow:hidden;margin-top:4mm;border:1px solid var(--line);page-break-inside:avoid;}
+  .p-split div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:8pt;font-weight:800;letter-spacing:0.06em;}
+  .p-split .cap{background:var(--gold);}
+  .p-split .ope{background:var(--black);}
+  .p-grand{display:flex;justify-content:space-between;align-items:center;margin-top:4mm;background:var(--black);color:var(--offwhite);padding:4mm 5mm;border-radius:2px;page-break-inside:avoid;}
+  .p-grand span{font-size:8.5pt;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-light);}
+  .p-grand b{font-size:20pt;}
+
+  .p-gantt{margin-top:3mm;border:1px solid var(--line);border-radius:2px;padding:4mm;page-break-inside:avoid;}
+  .p-gmonths{display:grid;margin-bottom:1.5mm;}
+  .p-gmonths div{font-size:7pt;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);text-align:center;border-left:1px solid var(--line);padding:1mm 0;}
+  .p-grow{display:flex;align-items:center;gap:3mm;margin-bottom:2mm;}
+  .p-glbl{flex:0 0 42mm;font-size:8.5pt;font-weight:800;}
+  .p-glbl small{display:block;font-weight:600;color:var(--gray);font-size:7pt;}
+  .p-gtrack{flex:1;position:relative;height:7mm;background:#faf8f4;border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  .p-ggrid{position:absolute;inset:0;display:grid;}
+  .p-ggrid span{border-left:1px solid rgba(10,10,10,0.06);}
+  .p-gbar{position:absolute;top:1mm;bottom:1mm;background:var(--gold);border-radius:1px;display:flex;align-items:center;padding:0 2mm;color:#fff;font-size:7pt;font-weight:800;white-space:nowrap;overflow:hidden;}
+  .p-gbar.alt{background:var(--black);}
+  .p-sign{margin-top:12mm;border-top:2px solid var(--black);padding-top:5mm;page-break-inside:avoid;}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ctn-logo" viewBox="0 0 675 578">
+    <rect x="24"  y="243" width="36" height="94"  rx="18" fill="currentColor"/>
+    <rect x="87"  y="189" width="40" height="199" rx="20" fill="currentColor"/>
+    <rect x="159" y="132" width="36" height="312" rx="18" fill="currentColor"/>
+    <rect x="224" y="58"  width="42" height="423" rx="21" fill="currentColor"/>
+    <path d="M291,155 Q291,135 311,135 Q333,135 333,155 L333,340 L291,428 Z" fill="currentColor"/>
+    <rect x="479" y="192" width="38" height="192" rx="19" fill="currentColor"/>
+    <rect x="545" y="230" width="40" height="116" rx="20" fill="currentColor"/>
+    <rect x="614" y="261" width="36" height="58"  rx="18" fill="currentColor"/>
+    <line x1="510" y1="44" x2="274" y2="536" stroke="currentColor" stroke-width="36" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<header>
+  <nav>
+    <div class="brand">
+      <svg><use href="#ctn-logo"/></svg>
+      <div>Cut the Noise.<br><small>Offerte Generator</small></div>
+    </div>
+    <div class="nav-right">
+      <a href="#" class="backlink" id="backlink">← Terug naar de pipeline</a>
+      <div class="nav-status" id="navStatus">Niet opgeslagen</div>
+    </div>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="kicker on-dark">B2B-afdeling &amp; Lease</span>
+    <h1>Offerte <span>samenstellen.</span></h1>
+    <p>Vul per onderdeel je input in. Met de schakelaar rechts in elke kop bepaal je of dat onderdeel in de PDF komt. Onderaan genereer je de offerte in de huisstijl, met de afgesproken prijs, de CAPEX/OPEX-onderverdeling en een visuele tijdsplanning.</p>
+    <div class="dealbar" id="dealbar">
+      <span class="tag">Gekoppeld</span>
+      <span id="dealbarText"></span>
+    </div>
+  </div>
+</div>
+
+<main>
+<div class="wrap">
+
+  <!-- 00 BASIS -->
+  <section class="card">
+    <div class="card-head"><span class="num">00</span><h2>Basisgegevens</h2><span class="hint">Vult de cover van de offerte — altijd opgenomen</span></div>
+    <div class="grid g3">
+      <div class="field">
+        <label for="dealer">Dealer / klant</label>
+        <input type="text" id="dealer" value="Van Beek" list="dealers">
+        <datalist id="dealers"><option value="Van Beek"><option value="Zeeuw"></datalist>
+      </div>
+      <div class="field"><label for="projectnaam">Projectnaam</label><input type="text" id="projectnaam" value="Opzet B2B-afdeling &amp; lease-propositie"></div>
+      <div class="field">
+        <label for="offertenr">Offertenummer</label>
+        <input type="text" id="offertenr" value="">
+        <div class="fhint" id="nrHint"></div>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="field"><label for="contact">Contactpersoon</label><input type="text" id="contact" value=""></div>
+      <div class="field"><label for="datum">Offertedatum</label><input type="date" id="datum"></div>
+      <div class="field"><label for="geldig">Geldig tot</label><input type="date" id="geldig"></div>
+    </div>
+  </section>
+
+  <!-- 01 -->
+  <section class="card" data-card="es">
+    <div class="card-head"><span class="num">01</span><h2>Executive Summary</h2>
+      <label class="sw" title="Opnemen in de PDF"><input type="checkbox" class="tog" data-sec="es" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="field"><label for="es_doel">Doel van het project</label><textarea id="es_doel">Het opzetten van een volwaardige B2B-afdeling inclusief een eigen lease-propositie, zodat de dealer zelfstandig zakelijke klanten kan werven, bedienen en behouden.</textarea></div>
+    <div class="field"><label for="es_impact">Verwachte impact voor de dealer</label><textarea id="es_impact">Nieuwe, terugkerende omzetstromen uit zakelijke klanten en lease. Professionalisering van het verkoopproces en een structurele leasecapaciteit die de dealer minder afhankelijk maakt van particuliere verkoop.</textarea></div>
+    <div class="field"><label for="es_sam">Samenvatting kosten, doorlooptijd &amp; deliverables</label><textarea id="es_sam">Een traject van 6 maanden (24 weken) in vier fasen, voor een vaste projectprijs. Oplevering omvat een B2B-blueprint, een werkende lease-propositie inclusief contracten, ingerichte processen en systemen, getrainde medewerkers, een KPI-dashboard en nazorg tot en met evaluatie.</textarea></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="card" data-card="doelen">
+    <div class="card-head"><span class="num">02</span><h2>Projectdoelstellingen</h2><span class="hint">Sleep met ▲▼ om te prioriteren</span>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="doelen" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="rows" id="doelen"></div>
+    <button class="add" data-add="doelen">+ Doelstelling toevoegen</button>
+  </section>
+
+  <!-- 03 -->
+  <section class="card" data-card="scope">
+    <div class="card-head"><span class="num">03</span><h2>Scope van het project</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="scope" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="field"><label>Binnen scope</label><div class="rows" id="scope_in"></div><button class="add" data-add="scope_in">+ Regel toevoegen</button></div>
+    <div class="field" style="margin-top:22px;"><label>Buiten scope</label><div class="rows" id="scope_out"></div><button class="add" data-add="scope_out">+ Regel toevoegen</button></div>
+    <div class="field" style="margin-top:22px;"><label>Randvoorwaarden</label><div class="rows" id="scope_rand"></div><button class="add" data-add="scope_rand">+ Regel toevoegen</button></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="card" data-card="aanpak">
+    <div class="card-head"><span class="num">04</span><h2>Aanpak &amp; Methodologie</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="aanpak" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="field"><label for="ap_aanpak">Aanpak in het kort</label><textarea id="ap_aanpak">Het project verloopt in vier opeenvolgende fasen met vaste werkpakketten en een duidelijke knip per fase. Elke fase wordt afgesloten met een go/no-go op basis van vooraf afgesproken opleverpunten.</textarea></div>
+    <div class="field"><label for="ap_rollen">Rollen &amp; verantwoordelijkheden</label><textarea id="ap_rollen">Cut the Noise levert de executie-lead en stuurt het traject aan. De dealer levert een interne opdrachtgever, een B2B-verantwoordelijke en de benodigde inzet vanuit sales, aftersales en administratie.</textarea></div>
+    <div class="field"><label for="ap_samen">Samenwerking dealer &amp; projectteam</label><textarea id="ap_samen">Wekelijks voortgangsoverleg, tweewekelijkse stuurgroep en een gedeelde actie- en risicolijst. Korte lijnen, geen ruis: besluiten worden binnen de week genomen.</textarea></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="card" data-card="planning">
+    <div class="card-head"><span class="num">05</span><h2>Tijdsplanning</h2><span class="hint">Startweek + duur bepalen de balk</span>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="planning" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div id="phases"></div>
+    <button class="add" data-addphase="1">+ Fase toevoegen</button>
+    <div class="gantt" id="ganttWrap">
+      <span class="kicker" style="font-size:11px;">Visuele planning</span>
+      <div id="ganttBody" style="margin-top:14px;"></div>
+      <div class="gantt-legend">
+        <span><i style="background:var(--gold)"></i>Fase</span>
+        <span><i style="background:var(--black)"></i>Slotfase (livegang / nazorg)</span>
+        <span id="ganttTotal"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="card" data-card="kosten">
+    <div class="card-head"><span class="num">06</span><h2>Kostenstructuur (CAPEX / OPEX)</h2><span class="hint">Bedragen excl. btw</span>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="kosten" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="cost-cols">
+      <div class="cost-block">
+        <h3>CAPEX</h3><div class="sub">Investeringskosten — afschrijfbaar over meerdere jaren</div>
+        <div class="rows" id="capex"></div>
+        <button class="add" data-addcost="capex">+ CAPEX-post</button>
+        <div class="cost-tot"><span>Totaal CAPEX</span><span id="capexTot">€ 0</span></div>
+      </div>
+      <div class="cost-block">
+        <h3>OPEX</h3><div class="sub">Operationele kosten — terugkerend</div>
+        <div class="rows" id="opex"></div>
+        <button class="add" data-addcost="opex">+ OPEX-post</button>
+        <div class="cost-tot"><span>Totaal OPEX</span><span id="opexTot">€ 0</span></div>
+      </div>
+    </div>
+    <div class="totbar">
+      <div class="split"><div class="cap" id="splitCap">CAPEX</div><div class="ope" id="splitOpe">OPEX</div></div>
+      <div class="grand"><span class="lab">Totale projectprijs (excl. btw)</span><span class="val" id="grandTot">€ 0</span></div>
+      <div class="field" style="margin-top:18px;max-width:320px;">
+        <label for="afgesproken">Afgesproken prijs (controle)</label>
+        <input type="number" id="afgesproken" value="75000" step="500">
+        <div class="fhint">Wijkt het totaal hiervan af, dan krijg je een waarschuwing.</div>
+      </div>
+      <div class="warn" id="costWarn"></div>
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section class="card" data-card="deliverables">
+    <div class="card-head"><span class="num">07</span><h2>Deliverables</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="deliverables" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="rows" id="deliverables"></div>
+    <button class="add" data-add="deliverables">+ Deliverable toevoegen</button>
+  </section>
+
+  <!-- 08 -->
+  <section class="card" data-card="risks">
+    <div class="card-head"><span class="num">08</span><h2>Risicoanalyse &amp; mitigatie</h2><span class="hint">Mitigatie groeit mee met de tekst</span>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="risks" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="risk-head"><span>Risico</span><span>Mitigatie</span><span class="sp"></span></div>
+    <div class="rows" id="risks"></div>
+    <button class="add" data-addrisk="1">+ Risico toevoegen</button>
+  </section>
+
+  <!-- 09 -->
+  <section class="card" data-card="governance">
+    <div class="card-head"><span class="num">09</span><h2>Governance &amp; Communicatie</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="governance" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="grid g2">
+      <div class="field"><label for="gv_stuur">Stuurgroep</label><textarea id="gv_stuur">Tweewekelijks, met de directie van de dealer en de executie-lead van Cut the Noise. Besluitvorming en escalatie.</textarea></div>
+      <div class="field"><label for="gv_overleg">Projectoverleggen</label><textarea id="gv_overleg">Wekelijks operationeel overleg met het B2B-team en betrokken afdelingen. Voortgang, blokkades en acties.</textarea></div>
+      <div class="field"><label for="gv_rap">Rapportagecyclus</label><textarea id="gv_rap">Maandelijkse voortgangsrapportage op basis van het KPI-dashboard: planning versus realisatie, budget en risico's.</textarea></div>
+      <div class="field"><label for="gv_esc">Escalatieprocedure</label><textarea id="gv_esc">Blokkades die niet binnen 5 werkdagen operationeel zijn opgelost, gaan direct naar de stuurgroep.</textarea></div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="card" data-card="kpi">
+    <div class="card-head"><span class="num">10</span><h2>KPI-dashboard</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="kpi" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="kpi-head"><span>KPI</span><span>Doel</span><span>Meting</span><span class="sp"></span></div>
+    <div class="rows" id="kpis"></div>
+    <button class="add" data-addkpi="1">+ KPI toevoegen</button>
+  </section>
+
+  <!-- 11 -->
+  <section class="card" data-card="financieel">
+    <div class="card-head"><span class="num">11</span><h2>Financiële voorwaarden</h2><span class="hint">Inclusief handtekeningblok</span>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="financieel" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="field"><label>Betalingsschema</label><div class="rows" id="betaling"></div><button class="add" data-add="betaling">+ Termijn toevoegen</button></div>
+    <div class="grid g2" style="margin-top:22px;">
+      <div class="field"><label for="fin_ann">Annuleringsvoorwaarden</label><textarea id="fin_ann">Bij annulering worden de tot dan toe verrichte werkzaamheden en gemaakte kosten in rekening gebracht, vermeerderd met 20% van het resterende projectbedrag van de lopende fase.</textarea></div>
+      <div class="field"><label for="fin_gar">Garanties</label><textarea id="fin_gar">Cut the Noise garandeert oplevering van de overeengekomen deliverables binnen de afgesproken doorlooptijd, mits de dealer voldoet aan de gestelde randvoorwaarden.</textarea></div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="card" data-card="bijlagen">
+    <div class="card-head"><span class="num">12</span><h2>Bijlagen</h2>
+      <label class="sw"><input type="checkbox" class="tog" data-sec="bijlagen" checked><span class="track"><span class="knob"></span></span><span class="swlbl">In PDF</span></label>
+    </div>
+    <div class="rows" id="bijlagen"></div>
+    <button class="add" data-add="bijlagen">+ Bijlage toevoegen</button>
+  </section>
+
+</div>
+</main>
+
+<div class="actionbar">
+  <div class="actionbar-in">
+    <div class="info">Totaal: <b id="barTot">€ 0</b> &nbsp;·&nbsp; CAPEX <b id="barCap">€ 0</b> / OPEX <b id="barOpe">€ 0</b> &nbsp;·&nbsp; <b id="barWeeks">0 weken</b> &nbsp;·&nbsp; <b id="barSecs">12/12 secties</b></div>
+    <button class="btn btn-ghost" id="btnLoad">Laden</button>
+    <button class="btn btn-outline-light" id="btnSave">Opslaan</button>
+    <button class="btn btn-gold" id="btnPdf">Offerte genereren</button>
+  </div>
+</div>
+<input type="file" id="fileIn" accept="application/json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<div id="print-root"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const el = (t,c)=>{const e=document.createElement(t); if(c) e.className=c; return e;};
+const eur = n => '€ ' + (Number(n)||0).toLocaleString('nl-NL');
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nlDate = v => { if(!v) return '—'; const d=new Date(v+'T00:00:00'); return d.toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'}); };
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function dirty(){$('#navStatus').textContent='Niet opgeslagen';$('#navStatus').style.color='#9a978f';}
+const isOn = k => { const c=document.querySelector('.tog[data-sec="'+k+'"]'); return !c || c.checked; };
+
+/* ============ offertenummer-teller ============
+   Telt door over alle accounts heen: opslaan zet het huidige nummer "vast",
+   een volgende offerte krijgt automatisch het nummer erna. Per jaar opnieuw. */
+const NUM_KEY='ctn_offerte_nr';
+const NR_RE=/^\s*(.*?)(\d{4})-(\d+)\s*$/;
+function nrState(){ try{ return JSON.parse(localStorage.getItem(NUM_KEY))||{}; }catch(e){ return {}; } }
+function nextNr(){
+  const y=new Date().getFullYear(), s=nrState();
+  const last = (s.year===y ? (s.last||0) : 0);
+  return 'CTN-'+y+'-'+String(last+1).padStart(3,'0');
+}
+function markNrUsed(nr){
+  const m=NR_RE.exec(String(nr||''));
+  if(!m) return null;                      // vrij ingetypt nummer: teller niet aanraken
+  const year=Number(m[2]), n=Number(m[3]), s=nrState();
+  if(s.year===year) s.last=Math.max(n, s.last||0);
+  else { s.year=year; s.last=n; }
+  localStorage.setItem(NUM_KEY, JSON.stringify({year:s.year, last:s.last}));
+  return m[1]+year+'-'+String(s.last+1).padStart(3,'0');
+}
+function nrHint(){
+  $('#nrHint').textContent = 'Telt automatisch door — wordt vastgezet zodra je opslaat.';
+}
+
+/* ============ CRM-koppeling via URL ============ */
+let LINK = {deal:null, from:null};
+function readLink(){
+  const q=new URLSearchParams(location.search);
+  const set=(id,v)=>{ if(v && $('#'+id)) $('#'+id).value=v; };
+  set('dealer', q.get('dealer'));
+  set('contact', q.get('contact'));
+  set('projectnaam', q.get('titel'));
+  const bedrag=Number(q.get('bedrag'));
+  if(bedrag>0) $('#afgesproken').value=bedrag;
+  if(q.get('nr')) set('offertenr', q.get('nr'));
+  LINK.deal = q.get('deal');
+  LINK.from = q.get('from');
+  if(LINK.deal){
+    $('#dealbar').classList.add('show');
+    $('#dealbarText').innerHTML = 'Deze offerte hoort bij de deal <b>'+esc(q.get('titel')||LINK.deal)+'</b>'
+      + (q.get('dealer')?' van <b>'+esc(q.get('dealer'))+'</b>':'')
+      + '. Het dealnummer komt op de offerte te staan.';
+    const back=$('#backlink');
+    back.href = LINK.from ? LINK.from : 'http://localhost:5174/';
+    back.classList.add('show');
+  }
+}
+
+/* ============ defaults ============ */
+const DEF = {
+  doelen:['Opzetten van een volwaardige B2B-afdeling','Implementatie van de lease-propositie','Inrichting van processen, systemen en governance','Training & enablement van medewerkers'],
+  scope_in:['Ontwerp en inrichting B2B-organisatie','Lease-propositie inclusief contractsjablonen','Proces- en systeeminrichting','Training en enablement van het team','Pilot, livegang en nazorg'],
+  scope_out:['Aanschaf van hardware en voertuigen','Externe juridische procedures','Werving en selectie van nieuw personeel','Marketingcampagnes en mediabudget'],
+  scope_rand:['Beschikbaarheid van sleutelmedewerkers gedurende het traject','Tijdige aanlevering van data en systeemtoegang','Besluitvorming binnen 5 werkdagen','Eén aanspreekpunt vanuit de dealer'],
+  deliverables:['B2B-afdeling blueprint','Lease-propositie inclusief contracten','Procesdocumentatie','KPI-dashboard','Training & enablement','Livegang + nazorg'],
+  betaling:['30% bij opdrachtverstrekking','30% bij afronding fase 2 (bouw & inrichting)','30% bij livegang','10% bij eindevaluatie na nazorg'],
+  bijlagen:['Planning (Gantt)','RACI-matrix','Procesflows','Lease-propositie schets'],
+  phases:[
+    {n:'Fase 1 — Analyse & ontwerp', s:1, d:4, a:'Marktanalyse; Inventarisatie huidige processen; Ontwerp B2B-structuur; Lease-propositie blueprint'},
+    {n:'Fase 2 — Bouw & inrichting', s:5, d:8, a:'Procesinrichting; Systeemconfiguratie; Contracten & juridische checks; Training medewerkers'},
+    {n:'Fase 3 — Implementatie & livegang', s:13, d:8, a:'Pilot; Optimalisatie; Livegang; Overdracht & documentatie'},
+    {n:'Fase 4 — Nazorg', s:21, d:4, a:'KPI-monitoring; Evaluatie; Fine-tuning'}
+  ],
+  capex:[['Ontwerp & bouw van processen',18000],['Systeeminrichting',14000],['Documentatie & templates',7000],['Trainingmodules',6000]],
+  opex:[['Projectmanagement',15000],['Support & nazorg',8000],['Licenties / tools',4000],['Training updates',3000]],
+  risks:[
+    ['Beschikbaarheid personeel','Vaste capaciteitsafspraken vooraf vastleggen; escalatie via de stuurgroep zodra sleutelmedewerkers uitvallen of onvoldoende tijd hebben.'],
+    ['Systeemintegraties','Vroege technische check in fase 1; fallback op een handmatig proces tijdens de pilot zodat livegang niet in gevaar komt.'],
+    ['Lease-contractcomplexiteit','Juridische toets in fase 2; gebruik van beproefde contractsjablonen die eerder bij vergelijkbare trajecten zijn ingezet.'],
+    ['Marktacceptatie','Pilot met een geselecteerde groep klanten; propositie bijsturen op basis van de eerste resultaten vóór de definitieve livegang.']
+  ],
+  kpis:[
+    ['% voltooiing per fase','100%','Wekelijkse update'],
+    ['Planning vs. realisatie','≤ 10% afwijking','Gantt tracking'],
+    ['Aantal B2B-leads','20 per maand','CRM'],
+    ['Conversie B2B-leads','> 15%','CRM'],
+    ['Klanttevredenheid B2B','> 8,0','Survey'],
+    ['Leasecontracten per maand','10','Lease systeem'],
+    ['Doorlooptijd leaseaanvraag','< 5 werkdagen','Procesmeting'],
+    ['Contracten juridisch goedgekeurd','100%','Legal'],
+    ['Budgetverbruik','≤ afgesproken prijs','Finance']
+  ]
+};
+
+/* ============ reorder controls ============ */
+function ctrls(row, after){
+  const g=el('div','ctrls');
+  const up=el('button','mv'); up.type='button'; up.innerHTML='&#9650;'; up.title='Omhoog (hogere prioriteit)';
+  const dn=el('button','mv'); dn.type='button'; dn.innerHTML='&#9660;'; dn.title='Omlaag (lagere prioriteit)';
+  const del=el('button','del'); del.type='button'; del.textContent='×'; del.title='Verwijderen';
+  up.onclick=()=>{const p=row.previousElementSibling; if(p){row.parentNode.insertBefore(row,p); refresh(row.parentNode);} after&&after(); dirty();};
+  dn.onclick=()=>{const n=row.nextElementSibling; if(n){row.parentNode.insertBefore(n,row); refresh(row.parentNode);} after&&after(); dirty();};
+  del.onclick=()=>{const p=row.parentNode; row.remove(); refresh(p); after&&after(); dirty();};
+  g.append(up,dn,del);
+  return g;
+}
+/* zet ▲ uit op de eerste rij en ▼ op de laatste */
+function refresh(container){
+  if(!container) return;
+  const rows=[...container.children].filter(c=>c.querySelector&&c.querySelector('.ctrls'));
+  rows.forEach((r,i)=>{
+    const mv=r.querySelectorAll('.ctrls .mv');
+    if(mv[0]) mv[0].disabled = i===0;
+    if(mv[1]) mv[1].disabled = i===rows.length-1;
+  });
+}
+function refreshAll(){
+  ['doelen','scope_in','scope_out','scope_rand','deliverables','betaling','bijlagen','capex','opex','risks','kpis']
+    .forEach(id=>refresh($('#'+id)));
+  refresh($('#phases'));
+}
+function autogrow(t){ t.style.height='auto'; t.style.height=Math.max(44,t.scrollHeight)+'px'; }
+
+/* ============ builders ============ */
+function addRow(id, val=''){
+  const wrap=$('#'+id); const r=el('div','row');
+  const i=el('input'); i.type='text'; i.value=val; i.addEventListener('input',dirty);
+  r.append(i, ctrls(r)); wrap.append(r); refresh(wrap);
+}
+function addCost(id, name='', amt=0){
+  const wrap=$('#'+id); const r=el('div','row');
+  const i=el('input'); i.type='text'; i.value=name; i.placeholder='Omschrijving';
+  const a=el('input','amt'); a.type='number'; a.value=amt; a.step='500'; a.placeholder='0';
+  [i,a].forEach(x=>x.addEventListener('input',()=>{calc();dirty();}));
+  r.append(i,a, ctrls(r, calc)); wrap.append(r); refresh(wrap);
+}
+function addRisk(a='', b=''){
+  const wrap=$('#risks'); const r=el('div','row risk-row');
+  const x=el('input'); x.type='text'; x.value=a; x.placeholder='Risico';
+  const y=el('textarea'); y.value=b; y.rows=1; y.placeholder='Mitigatie';
+  x.addEventListener('input',dirty);
+  y.addEventListener('input',()=>{autogrow(y);dirty();});
+  r.append(x,y, ctrls(r)); wrap.append(r); refresh(wrap);
+  requestAnimationFrame(()=>autogrow(y));
+}
+function addKpi(k='',doel='',met=''){
+  const wrap=$('#kpis'); const r=el('div','row kpi-row');
+  const a=el('input'); a.type='text'; a.value=k;
+  const b=el('input'); b.type='text'; b.value=doel;
+  const c=el('input'); c.type='text'; c.value=met;
+  [a,b,c].forEach(v=>v.addEventListener('input',dirty));
+  r.append(a,b,c, ctrls(r)); wrap.append(r); refresh(wrap);
+}
+function addPhase(p={n:'',s:1,d:4,a:''}){
+  const wrap=$('#phases'); const box=el('div','phase');
+  box.innerHTML=`
+    <div class="phase-top">
+      <div><span class="mini">Fase-naam</span><input type="text" class="ph-n" value="${esc(p.n)}"></div>
+      <div><span class="mini">Startweek</span><input type="number" class="ph-s" min="1" value="${p.s}"></div>
+      <div><span class="mini">Duur (wkn)</span><input type="number" class="ph-d" min="1" value="${p.d}"></div>
+      <div class="ph-ctrls"></div>
+    </div>
+    <div><span class="mini">Activiteiten (scheiden met ;)</span><input type="text" class="ph-a" value="${esc(p.a)}"></div>`;
+  box.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{gantt();dirty();}));
+  box.querySelector('.ph-ctrls').append(ctrls(box, gantt));
+  wrap.append(box); refresh(wrap);
+}
+
+/* ============ read state ============ */
+const listVals = id => $$('#'+id+' .row').map(r=>r.querySelector('input').value.trim()).filter(Boolean);
+const riskVals = () => $$('#risks .row').map(r=>[r.querySelector('input').value.trim(), r.querySelector('textarea').value.trim()]).filter(p=>p[0]||p[1]);
+const kpiVals = () => $$('#kpis .row').map(r=>{const i=r.querySelectorAll('input');return [i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];}).filter(p=>p[0]);
+const costVals = id => $$('#'+id+' .row').map(r=>{const i=r.querySelectorAll('input');return [i[0].value.trim(), Number(i[1].value)||0];}).filter(p=>p[0]||p[1]);
+const phaseVals = () => $$('#phases .phase').map(b=>({
+  n:b.querySelector('.ph-n').value.trim(), s:Number(b.querySelector('.ph-s').value)||1,
+  d:Number(b.querySelector('.ph-d').value)||1, a:b.querySelector('.ph-a').value.trim()
+})).filter(p=>p.n);
+const secState = () => Object.fromEntries($$('.tog').map(c=>[c.dataset.sec, c.checked]));
+
+function collect(){
+  return {
+    _deal:LINK.deal, _from:LINK.from,
+    dealer:$('#dealer').value, projectnaam:$('#projectnaam').value, offertenr:$('#offertenr').value,
+    contact:$('#contact').value, datum:$('#datum').value, geldig:$('#geldig').value,
+    es_doel:$('#es_doel').value, es_impact:$('#es_impact').value, es_sam:$('#es_sam').value,
+    doelen:listVals('doelen'), scope_in:listVals('scope_in'), scope_out:listVals('scope_out'), scope_rand:listVals('scope_rand'),
+    ap_aanpak:$('#ap_aanpak').value, ap_rollen:$('#ap_rollen').value, ap_samen:$('#ap_samen').value,
+    phases:phaseVals(), capex:costVals('capex'), opex:costVals('opex'), afgesproken:Number($('#afgesproken').value)||0,
+    deliverables:listVals('deliverables'), risks:riskVals(),
+    gv_stuur:$('#gv_stuur').value, gv_overleg:$('#gv_overleg').value, gv_rap:$('#gv_rap').value, gv_esc:$('#gv_esc').value,
+    kpis:kpiVals(), betaling:listVals('betaling'), fin_ann:$('#fin_ann').value, fin_gar:$('#fin_gar').value,
+    bijlagen:listVals('bijlagen'), sections:secState()
+  };
+}
+
+/* ============ calc + gantt ============ */
+function calc(){
+  const cap=costVals('capex').reduce((s,r)=>s+r[1],0);
+  const ope=costVals('opex').reduce((s,r)=>s+r[1],0);
+  const tot=cap+ope;
+  $('#capexTot').textContent=eur(cap); $('#opexTot').textContent=eur(ope); $('#grandTot').textContent=eur(tot);
+  $('#barTot').textContent=eur(tot); $('#barCap').textContent=eur(cap); $('#barOpe').textContent=eur(ope);
+  const pc=tot?Math.round(cap/tot*100):50;
+  $('#splitCap').style.width=pc+'%'; $('#splitOpe').style.width=(100-pc)+'%';
+  $('#splitCap').textContent=pc>12?'CAPEX '+pc+'%':'';
+  $('#splitOpe').textContent=(100-pc)>12?'OPEX '+(100-pc)+'%':'';
+  const target=Number($('#afgesproken').value)||0, w=$('#costWarn');
+  if(target && tot!==target){
+    const d=tot-target;
+    w.textContent=(d>0?'Let op: totaal is '+eur(Math.abs(d))+' hóger dan de afgesproken prijs ('+eur(target)+').'
+                      :'Let op: totaal is '+eur(Math.abs(d))+' lager dan de afgesproken prijs ('+eur(target)+').');
+    w.classList.add('show');
+  } else w.classList.remove('show');
+  return {cap,ope,tot};
+}
+function ganttModel(){
+  const ps=phaseVals();
+  const end=ps.reduce((m,p)=>Math.max(m,p.s+p.d-1),0)||1;
+  const weeks=Math.max(end,4);
+  return {ps,weeks,months:Math.ceil(weeks/4)};
+}
+function gantt(){
+  const {ps,weeks,months}=ganttModel();
+  const body=$('#ganttBody'); body.innerHTML='';
+  const mh=el('div','gantt-months');
+  mh.style.gridTemplateColumns=`repeat(${months},1fr)`;
+  mh.style.marginLeft='162px';
+  for(let i=1;i<=months;i++){const d=el('div');d.textContent='Maand '+i;mh.append(d);}
+  body.append(mh);
+  ps.forEach((p,idx)=>{
+    const row=el('div','gantt-row');
+    const lbl=el('div','gantt-lbl');
+    lbl.innerHTML=esc(p.n)+'<small>wk '+p.s+'–'+(p.s+p.d-1)+' · '+p.d+' wkn</small>';
+    const tr=el('div','gantt-track');
+    const g=el('div','gantt-grid'); g.style.gridTemplateColumns=`repeat(${weeks},1fr)`;
+    for(let i=0;i<weeks;i++) g.append(el('span'));
+    const bar=el('div','gantt-bar'+(idx>=ps.length-2?' alt':''));
+    bar.style.left=((p.s-1)/weeks*100)+'%';
+    bar.style.width=(p.d/weeks*100)+'%';
+    bar.textContent=p.d+' wkn';
+    tr.append(g,bar); row.append(lbl,tr); body.append(row);
+  });
+  $('#ganttTotal').textContent='Totale doorlooptijd: '+weeks+' weken (± '+months+' maanden)';
+  $('#barWeeks').textContent=weeks+' weken';
+}
+function secCount(){
+  const all=$$('.tog'), on=all.filter(c=>c.checked).length;
+  $('#barSecs').textContent=on+'/'+all.length+' secties';
+}
+
+/* ============ init ============ */
+function init(){
+  const t=new Date(); $('#datum').value=t.toISOString().slice(0,10);
+  $('#geldig').value=new Date(t.getTime()+30*864e5).toISOString().slice(0,10);
+  DEF.doelen.forEach(v=>addRow('doelen',v));
+  DEF.scope_in.forEach(v=>addRow('scope_in',v));
+  DEF.scope_out.forEach(v=>addRow('scope_out',v));
+  DEF.scope_rand.forEach(v=>addRow('scope_rand',v));
+  DEF.deliverables.forEach(v=>addRow('deliverables',v));
+  DEF.betaling.forEach(v=>addRow('betaling',v));
+  DEF.bijlagen.forEach(v=>addRow('bijlagen',v));
+  DEF.phases.forEach(addPhase);
+  DEF.capex.forEach(c=>addCost('capex',c[0],c[1]));
+  DEF.opex.forEach(c=>addCost('opex',c[0],c[1]));
+  DEF.risks.forEach(r=>addRisk(r[0],r[1]));
+  DEF.kpis.forEach(k=>addKpi(k[0],k[1],k[2]));
+  $('#offertenr').value = nextNr();  // eerstvolgende vrije nummer…
+  readLink();                        // …tenzij de CRM een nummer meegeeft
+  nrHint();
+  calc(); gantt(); secCount(); refreshAll();  // prijscontrole klopt nu op de CRM-prijs
+  $$('input,textarea,select').forEach(i=>i.addEventListener('input',dirty));
+  $('#afgesproken').addEventListener('input',calc);
+  $$('.tog').forEach(c=>c.addEventListener('change',()=>{
+    c.closest('.card').classList.toggle('off', !c.checked);
+    secCount(); dirty();
+  }));
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.add){ addRow(b.dataset.add); dirty(); }
+  if(b.dataset.addcost){ addCost(b.dataset.addcost); dirty(); }
+  if(b.dataset.addrisk){ addRisk(); dirty(); }
+  if(b.dataset.addkpi){ addKpi(); dirty(); }
+  if(b.dataset.addphase){ const {weeks}=ganttModel(); addPhase({n:'Nieuwe fase',s:weeks+1,d:4,a:''}); gantt(); dirty(); }
+});
+
+/* ============ save / load ============ */
+const KEY='ctn_offerte_v1';
+$('#btnSave').onclick=()=>{
+  const data=collect();
+  localStorage.setItem(KEY, JSON.stringify(data));
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=el('a'); a.href=URL.createObjectURL(blob);
+  a.download='offerte-'+(data.dealer||'dealer').toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-'+(data.offertenr||'')+'.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  const volgende = markNrUsed(data.offertenr);   // dit nummer is nu vergeven
+  $('#navStatus').textContent='Opgeslagen ✓'; $('#navStatus').style.color='#C99A4A';
+  toast(volgende
+    ? 'Opgeslagen als ' + data.offertenr + ' — volgende offerte wordt ' + volgende
+    : 'Opgeslagen — in je browser én als JSON-bestand');
+};
+$('#btnLoad').onclick=()=>{
+  const saved=localStorage.getItem(KEY);
+  if(saved && confirm('Laatst opgeslagen versie uit deze browser laden?\n\n(Annuleer om een JSON-bestand te kiezen.)')){ apply(JSON.parse(saved)); return; }
+  $('#fileIn').click();
+};
+$('#fileIn').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ apply(JSON.parse(r.result)); }catch(err){ toast('Kon dit bestand niet lezen'); } };
+  r.readAsText(f);
+};
+function apply(d){
+  ['dealer','projectnaam','offertenr','contact','datum','geldig','es_doel','es_impact','es_sam',
+   'ap_aanpak','ap_rollen','ap_samen','gv_stuur','gv_overleg','gv_rap','gv_esc','fin_ann','fin_gar','afgesproken']
+   .forEach(k=>{ if(d[k]!=null && $('#'+k)) $('#'+k).value=d[k]; });
+  const fill=(id,arr,fn)=>{ $('#'+id).innerHTML=''; (arr||[]).forEach(fn); };
+  fill('doelen',d.doelen,v=>addRow('doelen',v));
+  fill('scope_in',d.scope_in,v=>addRow('scope_in',v));
+  fill('scope_out',d.scope_out,v=>addRow('scope_out',v));
+  fill('scope_rand',d.scope_rand,v=>addRow('scope_rand',v));
+  fill('deliverables',d.deliverables,v=>addRow('deliverables',v));
+  fill('betaling',d.betaling,v=>addRow('betaling',v));
+  fill('bijlagen',d.bijlagen,v=>addRow('bijlagen',v));
+  fill('capex',d.capex,c=>addCost('capex',c[0],c[1]));
+  fill('opex',d.opex,c=>addCost('opex',c[0],c[1]));
+  fill('risks',d.risks,r=>addRisk(r[0],r[1]));
+  fill('kpis',d.kpis,k=>addKpi(k[0],k[1],k[2]));
+  $('#phases').innerHTML=''; (d.phases||[]).forEach(addPhase);
+  if(d.sections) $$('.tog').forEach(c=>{
+    if(d.sections[c.dataset.sec]!=null){
+      c.checked=d.sections[c.dataset.sec];
+      c.closest('.card').classList.toggle('off', !c.checked);
+    }
+  });
+  if(d._deal) LINK.deal=d._deal;
+  if(d._from) LINK.from=d._from;
+  calc(); gantt(); secCount(); refreshAll(); toast('Offerte geladen');
+  $('#navStatus').textContent='Geladen'; $('#navStatus').style.color='#C99A4A';
+}
+
+/* ============ PDF ============ */
+function ul(a){ return a.length? '<ul>'+a.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul>' : '<p>—</p>'; }
+function printGantt(ps,weeks,months){
+  let h='<div class="p-gantt"><div class="p-gmonths" style="grid-template-columns:repeat('+months+',1fr);margin-left:45mm">';
+  for(let i=1;i<=months;i++) h+='<div>Maand '+i+'</div>';
+  h+='</div>';
+  ps.forEach((p,i)=>{
+    h+='<div class="p-grow"><div class="p-glbl">'+esc(p.n)+'<small>wk '+p.s+'–'+(p.s+p.d-1)+' · '+p.d+' wkn</small></div>'
+     + '<div class="p-gtrack"><div class="p-ggrid" style="grid-template-columns:repeat('+weeks+',1fr)">'+'<span></span>'.repeat(weeks)+'</div>'
+     + '<div class="p-gbar'+(i>=ps.length-2?' alt':'')+'" style="left:'+((p.s-1)/weeks*100)+'%;width:'+(p.d/weeks*100)+'%">'+p.d+' wkn</div>'
+     + '</div></div>';
+  });
+  return h+'</div>';
+}
+/* Meet elke sectie op ware grootte op en verdeelt ze over A4-pagina's, zodat een
+   sectie niet half over een paginagrens valt. Een sectie die zelf groter is dan
+   een pagina krijgt een eigen pagina en mag intern afbreken. */
+const MM = 96/25.4;                       // mm → px bij 96 dpi
+const PAGE_W_MM = 210 - 14 - 14;          // A4 minus linker-/rechtermarge
+const PAGE_BOX_MM = 265;                  // hoogte van één .pg (zie CSS)
+const FOOT_MM = 11;                       // ruimte die de voettekst inneemt
+const PAGE_H_PX = (PAGE_BOX_MM - FOOT_MM) * MM;   // wat er aan secties op één pagina past
+function paginate(bodyHtml, footHtml){
+  const m = el('div');
+  m.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;font-size:10.5pt;width:'+PAGE_W_MM+'mm;';
+  m.innerHTML = bodyHtml;
+  document.body.append(m);
+  const kids = [...m.children];
+  // hoogte incl. marges: verschil tussen de bovenkanten van opeenvolgende secties
+  const hs = kids.map((k,i)=>{
+    const next = kids[i+1];
+    return (next ? next.offsetTop : m.scrollHeight) - k.offsetTop;
+  });
+  const html = kids.map(k=>k.outerHTML);
+  m.remove();
+
+  const pages=[[]]; let used=0;
+  html.forEach((sec,i)=>{
+    const h=hs[i];
+    if(used>0 && used+h > PAGE_H_PX){ pages.push([]); used=0; }  // past niet meer: nieuwe pagina
+    pages[pages.length-1].push(sec);
+    used += h;
+  });
+  // cover telt als pagina 1, dus de eerste inhoudspagina is nr. 2
+  const totaal = pages.length + 1;
+  return pages.map((p,i)=>
+    '<div class="pg"><div class="pg-body">'+p.join('')+'</div>'
+    + '<div class="p-pagefoot">'+footHtml+'<span>'+(i+2)+' / '+totaal+'</span></div></div>'
+  ).join('');
+}
+
+function buildPdf(){
+  const d=collect(); const {cap,ope,tot}=calc(); const {ps,weeks,months}=ganttModel();
+  const pcCap=tot?Math.round(cap/tot*100):50;
+  let n=0; const K=()=>String(++n).padStart(2,'0');
+
+  /* cover */
+  let h='<div class="p-cover"><div class="brand"><svg style="width:44px;height:38px;color:#F7F4EE"><use href="#ctn-logo"/></svg><span>Cut the Noise.</span></div>'
+   + '<h1>Offerte<br><span>'+esc(d.dealer)+'.</span></h1>'
+   + '<div class="tagline">'+esc(d.projectnaam)+'</div><div class="meta">'
+   + '<div><span>Offertenummer</span><b>'+esc(d.offertenr||'—')+'</b></div>'
+   + '<div><span>Datum</span><b>'+nlDate(d.datum)+'</b></div>'
+   + '<div><span>Contactpersoon</span><b>'+esc(d.contact||'—')+'</b></div>'
+   + '<div><span>Geldig tot</span><b>'+nlDate(d.geldig)+'</b></div>'
+   + (isOn('planning')?'<div><span>Doorlooptijd</span><b>'+weeks+' weken</b></div>':'')
+   + (isOn('kosten')?'<div><span>Investering (excl. btw)</span><b>'+eur(tot)+'</b></div>':'')
+   + (d._deal?'<div><span>Dealreferentie</span><b>'+esc(String(d._deal).slice(0,8))+'</b></div>':'')
+   + '</div></div>';
+
+  let body='';
+  if(isOn('es')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Executive Summary</h2>'
+   + '<h3>Doel van het project</h3><p>'+esc(d.es_doel)+'</p>'
+   + '<h3>Verwachte impact</h3><p>'+esc(d.es_impact)+'</p>'
+   + '<h3>Samenvatting</h3><p>'+esc(d.es_sam)+'</p></div>';
+
+  if(isOn('doelen')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Projectdoelstellingen</h2>'+ul(d.doelen)+'</div>';
+
+  if(isOn('scope')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Scope</h2>'
+   + '<h3>Binnen scope</h3>'+ul(d.scope_in)
+   + '<h3>Buiten scope</h3>'+ul(d.scope_out)
+   + '<h3>Randvoorwaarden</h3>'+ul(d.scope_rand)+'</div>';
+
+  if(isOn('aanpak')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Aanpak &amp; Methodologie</h2>'
+   + '<p>'+esc(d.ap_aanpak)+'</p>'
+   + '<h3>Rollen &amp; verantwoordelijkheden</h3><p>'+esc(d.ap_rollen)+'</p>'
+   + '<h3>Samenwerking</h3><p>'+esc(d.ap_samen)+'</p></div>';
+
+  if(isOn('planning')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Tijdsplanning — '+weeks+' weken</h2>'
+   + printGantt(ps,weeks,months)
+   + '<table class="p-tbl"><thead><tr><th>Fase</th><th>Weken</th><th>Duur</th><th>Activiteiten</th></tr></thead><tbody>'
+   + ps.map(p=>'<tr><td><b>'+esc(p.n)+'</b></td><td>'+p.s+'–'+(p.s+p.d-1)+'</td><td>'+p.d+' wkn</td><td>'+esc(p.a.split(';').map(s=>s.trim()).filter(Boolean).join(' · '))+'</td></tr>').join('')
+   + '</tbody></table></div>';
+
+  if(isOn('kosten')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Investering &amp; kostenstructuur</h2>'
+   + '<div class="p-money">'
+   + '<div class="p-mcard"><span>CAPEX</span><b>'+eur(cap)+'</b><i>Investering — afschrijfbaar</i></div>'
+   + '<div class="p-mcard"><span>OPEX</span><b>'+eur(ope)+'</b><i>Operationeel — terugkerend</i></div></div>'
+   + '<div class="p-split"><div class="cap" style="width:'+pcCap+'%">CAPEX '+pcCap+'%</div><div class="ope" style="width:'+(100-pcCap)+'%">OPEX '+(100-pcCap)+'%</div></div>'
+   + '<h3>CAPEX — investeringskosten</h3>'
+   + '<table class="p-tbl"><thead><tr><th>Post</th><th class="r">Bedrag</th></tr></thead><tbody>'
+   + d.capex.map(c=>'<tr><td>'+esc(c[0])+'</td><td class="r">'+eur(c[1])+'</td></tr>').join('')
+   + '</tbody><tfoot><tr><td>Totaal CAPEX</td><td class="r">'+eur(cap)+'</td></tr></tfoot></table>'
+   + '<h3>OPEX — operationele kosten</h3>'
+   + '<table class="p-tbl"><thead><tr><th>Post</th><th class="r">Bedrag</th></tr></thead><tbody>'
+   + d.opex.map(c=>'<tr><td>'+esc(c[0])+'</td><td class="r">'+eur(c[1])+'</td></tr>').join('')
+   + '</tbody><tfoot><tr><td>Totaal OPEX</td><td class="r">'+eur(ope)+'</td></tr></tfoot></table>'
+   + '<div class="p-grand"><span>Totale projectprijs — excl. btw</span><b>'+eur(tot)+'</b></div>'
+   + '<div class="p-note">Alle bedragen zijn exclusief btw. '+(d.afgesproken&&d.afgesproken!==tot?'Afgesproken prijs: '+eur(d.afgesproken)+'.':'Conform de afgesproken projectprijs.')+'</div></div>';
+
+  if(isOn('deliverables')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Deliverables</h2>'+ul(d.deliverables)+'</div>';
+
+  if(isOn('risks')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Risicoanalyse &amp; mitigatie</h2>'
+   + '<table class="p-tbl"><thead><tr><th style="width:32%">Risico</th><th>Mitigatie</th></tr></thead><tbody>'
+   + d.risks.map(r=>'<tr><td><b>'+esc(r[0])+'</b></td><td>'+esc(r[1])+'</td></tr>').join('')
+   + '</tbody></table></div>';
+
+  if(isOn('governance')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Governance &amp; Communicatie</h2>'
+   + '<table class="p-tbl"><tbody>'
+   + '<tr><td style="width:32%"><b>Stuurgroep</b></td><td>'+esc(d.gv_stuur)+'</td></tr>'
+   + '<tr><td><b>Projectoverleggen</b></td><td>'+esc(d.gv_overleg)+'</td></tr>'
+   + '<tr><td><b>Rapportagecyclus</b></td><td>'+esc(d.gv_rap)+'</td></tr>'
+   + '<tr><td><b>Escalatie</b></td><td>'+esc(d.gv_esc)+'</td></tr>'
+   + '</tbody></table></div>';
+
+  if(isOn('kpi')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>KPI-dashboard</h2>'
+   + '<table class="p-tbl"><thead><tr><th>KPI</th><th>Doel</th><th>Meting</th></tr></thead><tbody>'
+   + d.kpis.map(k=>'<tr><td>'+esc(k[0])+'</td><td><b>'+esc(k[1])+'</b></td><td>'+esc(k[2])+'</td></tr>').join('')
+   + '</tbody></table></div>';
+
+  if(isOn('financieel')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Financiële voorwaarden</h2>'
+   + '<h3>Betalingsschema</h3>'+ul(d.betaling)
+   + '<h3>Annuleringsvoorwaarden</h3><p>'+esc(d.fin_ann)+'</p>'
+   + '<h3>Garanties</h3><p>'+esc(d.fin_gar)+'</p></div>';
+
+  if(isOn('bijlagen')) body+='<div class="p-sec"><div class="p-kick">'+K()+'</div><h2>Bijlagen</h2>'+ul(d.bijlagen)+'</div>';
+
+  if(isOn('financieel')) body+='<div class="p-sign"><table style="width:100%"><tr>'
+   + '<td style="width:50%;vertical-align:bottom;padding-right:8mm">'
+   + '<div style="font-size:8pt;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#A8762A">Voor akkoord — '+esc(d.dealer)+'</div>'
+   + '<div style="border-bottom:1px solid #0A0A0A;height:16mm"></div>'
+   + '<div style="font-size:8pt;color:#6B6B66;margin-top:1.5mm">Naam, datum, handtekening</div></td>'
+   + '<td style="width:50%;vertical-align:bottom">'
+   + '<div style="font-size:8pt;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#A8762A">Cut the Noise.</div>'
+   + '<div style="border-bottom:1px solid #0A0A0A;height:16mm"></div>'
+   + '<div style="font-size:8pt;color:#6B6B66;margin-top:1.5mm">Arjan Schenk — Executive Partner</div></td>'
+   + '</tr></table></div>';
+
+  const foot = '<span>Cut the Noise. — Executive Partner</span>'
+             + '<span><b>'+esc(d.offertenr)+'</b> · '+esc(d.dealer)+'</span>';
+  h+=paginate(body, foot);
+  $('#print-root').innerHTML=h;
+}
+$('#btnPdf').onclick=()=>{
+  if(!$$('.tog').some(c=>c.checked)){ toast('Alle secties staan uit — zet er minstens één aan'); return; }
+  buildPdf();
+  const d=collect(), old=document.title;
+  document.title='Offerte '+(d.dealer||'')+' — '+(d.offertenr||'')+' — Cut the Noise';
+  window.addEventListener('afterprint',()=>{document.title=old;},{once:true});
+  setTimeout(()=>window.print(),120);
+};
+
+init();
+</script>
+</body>
+</html>
